@@ -6,6 +6,8 @@ local Storage = Instance.new("Folder")
 Storage.Parent = CoreGui
 Storage.Name = "Highlight_Storage"
 
+local highlightCache = {}
+
 local function updateHighlight(highlight, plr)
     local highlightColor = _G.AutoTeamColor and (plr.Team and plr.Team.TeamColor.Color or Color3.fromRGB(255, 255, 255)) or _G.CustomHighlightColor
     highlight.FillColor = highlightColor
@@ -13,39 +15,43 @@ local function updateHighlight(highlight, plr)
     highlight.OutlineTransparency = _G.OutlineTransparency
 end
 
-local function createHighlight(plr)
+local function getOrCreateHighlight(plr)
+    if highlightCache[plr.Name] then
+        return highlightCache[plr.Name]
+    end
+
     local highlight = Instance.new("Highlight")
     highlight.Name = plr.Name
     highlight.DepthMode = "AlwaysOnTop"
     highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
     highlight.Parent = Storage
+
+    highlightCache[plr.Name] = highlight
     return highlight
+end
+
+local function removeHighlight(plrName)
+    if highlightCache[plrName] then
+        highlightCache[plrName]:Destroy()
+        highlightCache[plrName] = nil
+    end
 end
 
 local function manageHighlight(plr)
     if plr == lp or (_G.HighlightTeamCheck and plr.Team == lp.Team) then
-        if Storage:FindFirstChild(plr.Name) then
-            Storage[plr.Name]:Destroy()
-        end
+        removeHighlight(plr.Name)
         return
     end
 
     local function onCharacterAdded(char)
-        local highlight = Storage:FindFirstChild(plr.Name)
-        if not highlight then
-            highlight = createHighlight(plr)
-        end
-
+        local highlight = getOrCreateHighlight(plr)
         updateHighlight(highlight, plr)
         highlight.Adornee = char
 
         local humanoid = char:FindFirstChildOfClass("Humanoid")
         if humanoid then
             humanoid.Died:Connect(function()
-                -- Удаляем highlight при смерти
-                if Storage:FindFirstChild(plr.Name) then
-                    Storage[plr.Name]:Destroy()
-                end
+                removeHighlight(plr.Name)
             end)
         end
     end
@@ -64,9 +70,7 @@ for _, v in ipairs(Players:GetPlayers()) do
 end
 
 Players.PlayerRemoving:Connect(function(plr)
-    if Storage:FindFirstChild(plr.Name) then
-        Storage[plr.Name]:Destroy()
-    end
+    removeHighlight(plr.Name)
 end)
 
 -- Обновление highlight в зависимости от состояния
@@ -77,9 +81,7 @@ game:GetService('RunService').RenderStepped:Connect(function()
         end
     else
         for _, v in ipairs(Players:GetPlayers()) do
-            if Storage:FindFirstChild(v.Name) then
-                Storage[v.Name]:Destroy()
-            end
+            removeHighlight(v.Name)
         end
     end
 end)
