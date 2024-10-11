@@ -1,0 +1,79 @@
+-- Основной скрипт для управления хитбоксами
+
+-- Функция для сброса хитбоксов тиммейтов
+local function resetTeamHitboxes()
+    local localPlayer = game:GetService('Players').LocalPlayer
+    local localTeam = localPlayer.Team
+
+    for _, v in ipairs(game:GetService('Players'):GetPlayers()) do
+        if v ~= localPlayer and v.Team == localTeam and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+            local rootPart = v.Character.HumanoidRootPart
+            rootPart.Size = Vector3.new(2, 2, 1) -- Восстанавливаем оригинальный размер
+            rootPart.Transparency = 1
+            rootPart.Material = "Plastic"
+        end
+    end
+end
+
+-- Основной код для управления хитбоксами
+local function updateHitbox(v)
+    if v ~= game:GetService('Players').LocalPlayer and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") then
+        local humanoid = v.Character.Humanoid
+        local rootPart = v.Character.HumanoidRootPart
+
+        if humanoid.Health > 0 then
+            rootPart.Size = Vector3.new(_G.HeadSize, _G.HeadSize, _G.HeadSize)
+            rootPart.Transparency = _G.HitboxTransparency
+            rootPart.Color = _G.HitboxColor
+            rootPart.Material = "Neon"
+            rootPart.CanCollide = false
+
+            -- Подписываемся на событие смерти
+            humanoid.Died:Connect(function()
+                rootPart.Size = Vector3.new(2, 2, 1) -- Восстанавливаем оригинальный размер
+                rootPart.Transparency = 1
+                rootPart.Material = "Plastic"
+            end)
+        else
+            rootPart.Size = Vector3.new(2, 2, 1) -- Восстанавливаем оригинальный размер
+            rootPart.Transparency = 1
+        end
+    end
+end
+
+-- Запуск цикла для сброса хитбоксов каждые 3 секунды
+spawn(function()
+    while true do
+        if _G.TeamCheck then
+            resetTeamHitboxes()
+        end
+        wait(3) -- Интервал в 3 секунды
+    end
+end)
+
+game:GetService('RunService').RenderStepped:Connect(function()
+    local localPlayer = game:GetService('Players').LocalPlayer
+    local localTeam = localPlayer.Team
+
+    for _, v in ipairs(game:GetService('Players'):GetPlayers()) do
+        if v.Name ~= localPlayer.Name then
+            local isSameTeam = _G.TeamCheck and v.Team == localTeam
+            if not _G.Disabled and not isSameTeam then
+                pcall(function()
+                    updateHitbox(v)
+                end)
+            end
+        end
+    end
+end)
+
+game:GetService('Players').PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function(character)
+        wait(0.1)
+        if not _G.Disabled then
+            pcall(function()
+                updateHitbox(player)
+            end)
+        end
+    end)
+end)
