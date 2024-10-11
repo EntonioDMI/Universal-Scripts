@@ -81,19 +81,35 @@ end)
 
 -- Обновление highlight в зависимости от состояния
 local previousHighlightState = _G.HighlightEnabled
+local previousTeamCheck = _G.HighlightTeamCheck
+local previousAutoTeamColor = _G.AutoTeamColor
+local previousCustomHighlightColor = _G.CustomHighlightColor
+local previousFillTransparency = _G.FillTransparency
+local previousOutlineTransparency = _G.OutlineTransparency
+
 game:GetService('RunService').RenderStepped:Connect(function()
-    if _G.HighlightEnabled ~= previousHighlightState then
-        previousHighlightState = _G.HighlightEnabled
-        if _G.HighlightEnabled then
-            for _, v in ipairs(Players:GetPlayers()) do
-                manageHighlight(v)
-            end
-        else
-            for _, v in ipairs(Players:GetPlayers()) do
-                if Storage:FindFirstChild(v.Name) then
-                    Storage[v.Name]:Destroy()
-                    log("Destroyed Highlight for player on disable: " .. v.Name, "INFO")
-                end
+    local significantChange = 
+        _G.HighlightTeamCheck ~= previousTeamCheck or
+        _G.AutoTeamColor ~= previousAutoTeamColor or
+        _G.CustomHighlightColor ~= previousCustomHighlightColor or
+        _G.FillTransparency ~= previousFillTransparency or
+        _G.OutlineTransparency ~= previousOutlineTransparency
+
+    if _G.HighlightEnabled and significantChange then
+        previousTeamCheck = _G.HighlightTeamCheck
+        previousAutoTeamColor = _G.AutoTeamColor
+        previousCustomHighlightColor = _G.CustomHighlightColor
+        previousFillTransparency = _G.FillTransparency
+        previousOutlineTransparency = _G.OutlineTransparency
+
+        for _, v in ipairs(Players:GetPlayers()) do
+            manageHighlight(v)
+        end
+    elseif not _G.HighlightEnabled then
+        for _, v in ipairs(Players:GetPlayers()) do
+            if Storage:FindFirstChild(v.Name) then
+                Storage[v.Name]:Destroy()
+                log("Destroyed Highlight for player on disable: " .. v.Name, "INFO")
             end
         end
     end
