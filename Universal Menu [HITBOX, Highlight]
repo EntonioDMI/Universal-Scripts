@@ -1,0 +1,179 @@
+-- Universal Menu [HITBOX, Highlight]
+
+-- Загрузка библиотеки Fluent
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+
+-- Создание окна
+local Window = Fluent:CreateWindow({
+    Title = "Fluent " .. Fluent.Version,
+    SubTitle = "Manager",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = true,
+    Theme = "Light",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
+
+-- Создание вкладок
+local Tabs = {
+    Main = Window:AddTab({ Title = "Hitbox", Icon = "circle-dot" }),
+    Highlight = Window:AddTab({ Title = "Highlight", Icon = "circle-dot" }),
+    About = Window:AddTab({ Title = "About", Icon = "bitcoin" })
+}
+
+-- Добавление секции и элементов управления на вкладку Main
+local Section = Tabs.Main:AddSection("Hitbox Settings")
+
+-- Переключатель для включения/выключения хитбоксов
+_G.Disabled = true
+Section:AddToggle("EnableHitboxes", {
+    Title = "Enable Hitboxes",
+    Description = "Toggle hitbox visibility",
+    Default = false,
+    Callback = function(state)
+        _G.Disabled = not state
+        if _G.Disabled then
+            for _, v in ipairs(game:GetService('Players'):GetPlayers()) do
+                if v ~= game:GetService('Players').LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                    local rootPart = v.Character.HumanoidRootPart
+                    rootPart.Size = Vector3.new(2, 2, 1) -- Восстанавливаем оригинальный размер
+                    rootPart.Transparency = 1 -- Делаем хитбокс невидимым
+                    rootPart.Material = "Plastic" -- Убираем материал "Neon"
+                end
+            end
+        end
+    end
+})
+
+-- Ползунок для размера хитбокса
+Section:AddSlider("HitboxSize", {
+    Title = "Hitbox Size",
+    Description = "Adjust the size of the hitbox",
+    Default = 25,
+    Min = 1,
+    Max = 50,
+    Rounding = 1,
+    Callback = function(value)
+        _G.HeadSize = value
+    end
+})
+
+-- Переключатель для проверки команды
+_G.TeamCheck = false
+
+Section:AddToggle("TeamCheckToggle", {
+    Title = "Team Check",
+    Description = "Ignore hitboxes for players on the same team",
+    Default = false,
+    Callback = function(state)
+        _G.TeamCheck = state
+    end
+})
+
+-- Ползунок для прозрачности хитбокса
+Section:AddSlider("HitboxTransparency", {
+    Title = "Hitbox Transparency",
+    Description = "Adjust the transparency of the hitbox",
+    Default = 0.7,
+    Min = 0,
+    Max = 1,
+    Rounding = 2,
+    Callback = function(value)
+        _G.HitboxTransparency = value
+    end
+})
+
+-- Цветовой пикер для цвета хитбокса
+Section:AddColorpicker("HitboxColor", {
+    Title = "Hitbox Color",
+    Description = "Select the color of the hitbox",
+    Default = Color3.fromRGB(255, 0, 0),
+    Callback = function(color)
+        _G.HitboxColor = color
+    end
+})
+
+-- Добавление секции и элементов управления на вкладку Highlight
+local HighlightSection = Tabs.Highlight:AddSection("Highlight Settings")
+
+-- Переключатель для включения/выключения highlight
+_G.HighlightEnabled = false
+HighlightSection:AddToggle("EnableHighlight", {
+    Title = "Enable Highlight",
+    Description = "Toggle highlight visibility",
+    Default = false,
+    Callback = function(state)
+        _G.HighlightEnabled = state
+    end
+})
+
+-- Переключатель для автоматического определения цвета команды
+_G.AutoTeamColor = false
+HighlightSection:AddToggle("AutoTeamColor", {
+    Title = "Automatic Team Color",
+    Description = "Automatically use team color for highlight",
+    Default = false,
+    Callback = function(state)
+        _G.AutoTeamColor = state
+    end
+})
+
+-- Переключатель для игнорирования игроков из той же команды
+_G.HighlightTeamCheck = false
+HighlightSection:AddToggle("HighlightTeamCheck", {
+    Title = "Team Check",
+    Description = "Ignore highlights for players on the same team",
+    Default = false,
+    Callback = function(state)
+        _G.HighlightTeamCheck = state
+    end
+})
+
+-- Цветовой пикер для пользовательского цвета highlight
+_G.CustomHighlightColor = Color3.fromRGB(255, 255, 255)
+HighlightSection:AddColorpicker("CustomHighlightColor", {
+    Title = "Custom Highlight Color",
+    Description = "Choose a custom color for highlight",
+    Default = Color3.fromRGB(255, 255, 255),
+    Callback = function(color)
+        _G.CustomHighlightColor = color
+    end
+})
+
+-- Ползунок для прозрачности заливки highlight
+_G.FillTransparency = 0.5
+HighlightSection:AddSlider("FillTransparency", {
+    Title = "Fill Transparency",
+    Description = "Adjust the fill transparency of the highlight",
+    Default = 0.5,
+    Min = 0,
+    Max = 1,
+    Rounding = 2,
+    Callback = function(value)
+        _G.FillTransparency = value
+    end
+})
+
+-- Ползунок для прозрачности контура highlight
+_G.OutlineTransparency = 0
+HighlightSection:AddSlider("OutlineTransparency", {
+    Title = "Outline Transparency",
+    Description = "Adjust the outline transparency of the highlight",
+    Default = 0,
+    Min = 0,
+    Max = 1,
+    Rounding = 2,
+    Callback = function(value)
+        _G.OutlineTransparency = value
+    end
+})
+
+-- Добавление информации об авторе на вкладку About
+Tabs.About:AddParagraph({
+    Title = "Author",
+    Content = "Created by EntonioDMI\nDiscord: entonio\n\nThis script allows you to manage hitboxes and highlights in the game, providing options to adjust visibility and appearance."
+})
+
+-- Загрузка скриптов
+loadstring(game:HttpGet("https://raw.githubusercontent.com/EntonioDMI/EntonioDevelopment/refs/heads/main/HitboxExpander"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/EntonioDMI/EntonioDevelopment/refs/heads/main/Highlight"))()
