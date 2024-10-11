@@ -1,0 +1,34 @@
+--smth
+
+-- Интервал проверки в секундах
+local checkInterval = 1
+
+-- Переменная для включения/выключения функционала
+local isEnabled = true
+
+-- Функция для настройки highlight
+local function setHighlightAlwaysOnTop(model)
+    local highlight = model:FindFirstChild("highlight")
+    if highlight then
+        highlight.AlwaysOnTop = true
+    end
+end
+
+-- Функция для проверки всех моделей в папках
+local function checkModels()
+    for _, folder in ipairs(game.Workspace.Area.clue:GetChildren()) do
+        for _, model in ipairs(folder:GetChildren()) do
+            if model:IsA("Model") then
+                setHighlightAlwaysOnTop(model)
+            end
+        end
+    end
+end
+
+-- Цикл для регулярной проверки
+while true do
+    if isEnabled then
+        checkModels()
+    end
+    wait(checkInterval)
+end
