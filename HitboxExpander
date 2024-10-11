@@ -27,13 +27,6 @@ local function updateHitbox(v)
             rootPart.Color = _G.HitboxColor
             rootPart.Material = "Neon"
             rootPart.CanCollide = false
-
-            -- Подписываемся на событие смерти
-            humanoid.Died:Connect(function()
-                rootPart.Size = Vector3.new(2, 2, 1) -- Восстанавливаем оригинальный размер
-                rootPart.Transparency = 1
-                rootPart.Material = "Plastic"
-            end)
         else
             rootPart.Size = Vector3.new(2, 2, 1) -- Восстанавливаем оригинальный размер
             rootPart.Transparency = 1
@@ -41,13 +34,10 @@ local function updateHitbox(v)
     end
 end
 
--- Запуск цикла для сброса хитбоксов каждые 3 секунды
-spawn(function()
-    while true do
-        if _G.TeamCheck then
-            resetTeamHitboxes()
-        end
-        wait(3) -- Интервал в 3 секунды
+-- Запуск цикла для сброса хитбоксов
+game:GetService('RunService').Heartbeat:Connect(function(deltaTime)
+    if _G.TeamCheck then
+        resetTeamHitboxes()
     end
 end)
 
@@ -73,6 +63,19 @@ game:GetService('Players').PlayerAdded:Connect(function(player)
         if not _G.Disabled then
             pcall(function()
                 updateHitbox(player)
+            end)
+        end
+
+        -- Подписываемся на событие смерти один раз при создании персонажа
+        local humanoid = character:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid.Died:Connect(function()
+                local rootPart = character:FindFirstChild("HumanoidRootPart")
+                if rootPart then
+                    rootPart.Size = Vector3.new(2, 2, 1) -- Восстанавливаем оригинальный размер
+                    rootPart.Transparency = 1
+                    rootPart.Material = "Plastic"
+                end
             end)
         end
     end)
