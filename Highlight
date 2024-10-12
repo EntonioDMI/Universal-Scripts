@@ -75,24 +75,22 @@ end)
 
 -- Обновление всех подсветок
 local function updateAllHighlights()
-    for _, v in ipairs(Players:GetPlayers()) do
-        if highlightCache[v.Name] then
-            updateHighlight(highlightCache[v.Name], v)
+    if _G.HighlightEnabled then
+        for _, v in ipairs(Players:GetPlayers()) do
+            if not highlightCache[v.Name] then
+                manageHighlight(v)
+            else
+                updateHighlight(highlightCache[v.Name], v)
+            end
+        end
+    else
+        for _, v in ipairs(Players:GetPlayers()) do
+            removeHighlight(v.Name)
         end
     end
 end
 
--- Следим за изменением состояния подсветки
-local lastHighlightEnabled = _G.HighlightEnabled
+-- Постоянное обновление состояния подсветки
 RunService.RenderStepped:Connect(function()
-    if _G.HighlightEnabled ~= lastHighlightEnabled then
-        lastHighlightEnabled = _G.HighlightEnabled
-        if lastHighlightEnabled then
-            updateAllHighlights()
-        else
-            for _, v in ipairs(Players:GetPlayers()) do
-                removeHighlight(v.Name)
-            end
-        end
-    end
+    updateAllHighlights()
 end)
