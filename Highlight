@@ -56,9 +56,8 @@ local function manageHighlight(plr)
         end
     end
 
-    local plrchar = plr.Character
-    if plrchar then
-        onCharacterAdded(plrchar)
+    if plr.Character then
+        onCharacterAdded(plr.Character)
     end
 
     plr.CharacterAdded:Connect(onCharacterAdded)
@@ -73,12 +72,18 @@ Players.PlayerRemoving:Connect(function(plr)
     removeHighlight(plr.Name)
 end)
 
--- Обновление highlight в зависимости от состояния
+-- Оптимизация обновления highlight
+local function updateAllHighlights()
+    for _, v in ipairs(Players:GetPlayers()) do
+        if highlightCache[v.Name] then
+            updateHighlight(highlightCache[v.Name], v)
+        end
+    end
+end
+
 game:GetService('RunService').RenderStepped:Connect(function()
     if _G.HighlightEnabled then
-        for _, v in ipairs(Players:GetPlayers()) do
-            manageHighlight(v)
-        end
+        updateAllHighlights()
     else
         for _, v in ipairs(Players:GetPlayers()) do
             removeHighlight(v.Name)
