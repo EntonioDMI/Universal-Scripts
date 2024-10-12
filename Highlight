@@ -40,12 +40,12 @@ end
 
 local function manageHighlight(plr)
     local function updatePlayerHighlight()
-        if plr == lp or (_G.HighlightTeamCheck and plr.Team == lp.Team) then
-            removeHighlight(plr.Name)
-        else
+        if _G.HighlightEnabled and not (plr == lp or (_G.HighlightTeamCheck and plr.Team == lp.Team)) then
             local highlight = getOrCreateHighlight(plr)
             updateHighlight(highlight, plr)
             highlight.Adornee = plr.Character
+        else
+            removeHighlight(plr.Name)
         end
     end
 
@@ -72,26 +72,9 @@ end)
 local lastHighlightEnabled = _G.HighlightEnabled or false
 RunService.RenderStepped:Connect(function()
     if _G.HighlightEnabled ~= lastHighlightEnabled then
-        if _G.HighlightEnabled then
-            -- Включение подсветки
-            for _, v in ipairs(Players:GetPlayers()) do
-                manageHighlight(v)
-            end
-        else
-            -- Отключение подсветки
-            for _, v in ipairs(Players:GetPlayers()) do
-                removeHighlight(v.Name)
-            end
-        end
         lastHighlightEnabled = _G.HighlightEnabled
-    end
-
-    -- Обновление существующих подсветок
-    if _G.HighlightEnabled then
         for _, v in ipairs(Players:GetPlayers()) do
-            if highlightCache[v.Name] then
-                updateHighlight(highlightCache[v.Name], v)
-            end
+            manageHighlight(v)
         end
     end
 end)
