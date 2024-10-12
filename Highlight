@@ -83,23 +83,16 @@ local function updateAllHighlights()
 end
 
 -- Следим за изменением состояния подсветки
-local function onHighlightStateChanged()
-    if _G.HighlightEnabled then
-        updateAllHighlights()
-    else
-        for _, v in ipairs(Players:GetPlayers()) do
-            removeHighlight(v.Name)
-        end
-    end
-end
-
--- Подписка на событие изменения состояния подсветки
 local lastHighlightEnabled = _G.HighlightEnabled
 RunService.RenderStepped:Connect(function()
     if _G.HighlightEnabled ~= lastHighlightEnabled then
         lastHighlightEnabled = _G.HighlightEnabled
-        onHighlightStateChanged()
+        if lastHighlightEnabled then
+            updateAllHighlights()
+        else
+            for _, v in ipairs(Players:GetPlayers()) do
+                removeHighlight(v.Name)
+            end
+        end
     end
 end)
-
--- Вызывайте onHighlightStateChanged() при изменении _G.HighlightEnabled
