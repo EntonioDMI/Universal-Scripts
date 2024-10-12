@@ -1,6 +1,5 @@
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local lp = Players.LocalPlayer
 
 local Storage = Instance.new("Folder")
@@ -65,32 +64,32 @@ local function manageHighlight(plr)
 end
 
 Players.PlayerAdded:Connect(manageHighlight)
-for _, v in ipairs(Players:GetPlayers()) do
-    manageHighlight(v)
-end
-
 Players.PlayerRemoving:Connect(function(plr)
     removeHighlight(plr.Name)
 end)
 
--- Обновление всех подсветок
+-- Функция для обновления всех подсветок
 local function updateAllHighlights()
-    if _G.HighlightEnabled then
-        for _, v in ipairs(Players:GetPlayers()) do
-            if not highlightCache[v.Name] then
-                manageHighlight(v)
-            else
-                updateHighlight(highlightCache[v.Name], v)
-            end
-        end
-    else
-        for _, v in ipairs(Players:GetPlayers()) do
-            removeHighlight(v.Name)
+    for _, v in ipairs(Players:GetPlayers()) do
+        if highlightCache[v.Name] then
+            updateHighlight(highlightCache[v.Name], v)
         end
     end
 end
 
--- Постоянное обновление состояния подсветки
-RunService.RenderStepped:Connect(function()
-    updateAllHighlights()
+-- Следим за изменением состояния подсветки
+local lastHighlightEnabled = _G.HighlightEnabled
+game:GetService("RunService").RenderStepped:Connect(function()
+    if _G.HighlightEnabled and not lastHighlightEnabled then
+        -- Включение подсветки
+        for _, v in ipairs(Players:GetPlayers()) do
+            manageHighlight(v)
+        end
+    elseif not _G.HighlightEnabled and lastHighlightEnabled then
+        -- Отключение подсветки
+        for _, v in ipairs(Players:GetPlayers()) do
+            removeHighlight(v.Name)
+        end
+    end
+    lastHighlightEnabled = _G.HighlightEnabled
 end)
