@@ -77,4 +77,13 @@ RunService.RenderStepped:Connect(function()
             manageHighlight(v)
         end
     end
+
+    -- Обновление существующих подсветок в реальном времени
+    if _G.HighlightEnabled then
+        for _, v in ipairs(Players:GetPlayers()) do
+            if highlightCache[v.Name] then
+                updateHighlight(highlightCache[v.Name], v)
+            end
+        end
+    end
 end)
