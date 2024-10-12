@@ -69,22 +69,18 @@ Players.PlayerRemoving:Connect(function(plr)
 end)
 
 -- Следим за изменением состояния подсветки и параметров в реальном времени
-local lastHighlightEnabled = _G.HighlightEnabled or false
 RunService.RenderStepped:Connect(function()
-    -- Обновление подсветки при изменении состояния
-    if _G.HighlightEnabled ~= lastHighlightEnabled then
-        lastHighlightEnabled = _G.HighlightEnabled
-        for _, v in ipairs(Players:GetPlayers()) do
-            manageHighlight(v)
-        end
-    end
-
-    -- Обновление существующих подсветок в реальном времени
     if _G.HighlightEnabled then
         for _, v in ipairs(Players:GetPlayers()) do
             if highlightCache[v.Name] then
                 updateHighlight(highlightCache[v.Name], v)
+            else
+                manageHighlight(v)
             end
+        end
+    else
+        for _, v in ipairs(Players:GetPlayers()) do
+            removeHighlight(v.Name)
         end
     end
 end)
