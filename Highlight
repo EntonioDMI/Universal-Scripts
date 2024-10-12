@@ -39,29 +39,28 @@ local function removeHighlight(plrName)
 end
 
 local function manageHighlight(plr)
-    if plr == lp or (_G.HighlightTeamCheck and plr.Team == lp.Team) then
-        removeHighlight(plr.Name)
-        return
+    local function updatePlayerHighlight()
+        if plr == lp or (_G.HighlightTeamCheck and plr.Team == lp.Team) then
+            removeHighlight(plr.Name)
+        else
+            local highlight = getOrCreateHighlight(plr)
+            updateHighlight(highlight, plr)
+            highlight.Adornee = plr.Character
+        end
     end
 
-    local function onCharacterAdded(char)
-        local highlight = getOrCreateHighlight(plr)
-        updateHighlight(highlight, plr)
-        highlight.Adornee = char
+    updatePlayerHighlight()
 
+    plr:GetPropertyChangedSignal("Team"):Connect(updatePlayerHighlight)
+    plr.CharacterAdded:Connect(function(char)
+        updatePlayerHighlight()
         local humanoid = char:FindFirstChildOfClass("Humanoid")
         if humanoid then
             humanoid.Died:Connect(function()
                 removeHighlight(plr.Name)
             end)
         end
-    end
-
-    if plr.Character then
-        onCharacterAdded(plr.Character)
-    end
-
-    plr.CharacterAdded:Connect(onCharacterAdded)
+    end)
 end
 
 Players.PlayerAdded:Connect(manageHighlight)
