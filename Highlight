@@ -53,16 +53,12 @@ local function manageHighlight(plr)
 
     plr:GetPropertyChangedSignal("Team"):Connect(updatePlayerHighlight)
     plr.CharacterAdded:Connect(function(char)
-        if _G.HighlightEnabled then
-            updatePlayerHighlight()
-            local humanoid = char:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                humanoid.Died:Connect(function()
-                    removeHighlight(plr.Name)
-                end)
-            end
-        else
-            removeHighlight(plr.Name)
+        updatePlayerHighlight()
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.Died:Connect(function()
+                removeHighlight(plr.Name)
+            end)
         end
     end)
 end
@@ -72,13 +68,23 @@ Players.PlayerRemoving:Connect(function(plr)
     removeHighlight(plr.Name)
 end)
 
--- Следим за изменением состояния подсветки
+-- Следим за изменением состояния подсветки и параметров в реальном времени
 local lastHighlightEnabled = _G.HighlightEnabled or false
 RunService.RenderStepped:Connect(function()
+    -- Обновление подсветки при изменении состояния
     if _G.HighlightEnabled ~= lastHighlightEnabled then
         lastHighlightEnabled = _G.HighlightEnabled
         for _, v in ipairs(Players:GetPlayers()) do
             manageHighlight(v)
+        end
+    end
+
+    -- Обновление существующих подсветок в реальном времени
+    if _G.HighlightEnabled then
+        for _, v in ipairs(Players:GetPlayers()) do
+            if highlightCache[v.Name] then
+                updateHighlight(highlightCache[v.Name], v)
+            end
         end
     end
 end)
