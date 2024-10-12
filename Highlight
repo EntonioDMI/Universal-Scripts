@@ -81,12 +81,16 @@ local function updateAllHighlights()
     end
 end
 
+local highlightEnabled = false
 game:GetService('RunService').RenderStepped:Connect(function()
-    if _G.HighlightEnabled then
-        updateAllHighlights()
-    else
-        for _, v in ipairs(Players:GetPlayers()) do
-            removeHighlight(v.Name)
+    if _G.HighlightEnabled ~= highlightEnabled then
+        highlightEnabled = _G.HighlightEnabled
+        if highlightEnabled then
+            updateAllHighlights()
+        else
+            for _, v in ipairs(Players:GetPlayers()) do
+                removeHighlight(v.Name)
+            end
         end
     end
 end)
