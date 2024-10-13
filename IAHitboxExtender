@@ -56,31 +56,19 @@ end
 
 -- Функция для обновления всех NPC
 local function updateAllNPCs()
-    -- Обработка миньёнов
-    for _, minionName in ipairs({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}) do
-        local minion = game.Workspace.NPCs:FindFirstChild(minionName)
-        if minion then
-            pcall(function()
-                if _G.EnableMinionHitboxes then
-                    updateMinionHitbox(minion)
-                else
-                    resetHitbox(minion)
-                end
-            end)
-        end
-    end
-
-    -- Обработка боссов
-    for _, bossName in ipairs({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}) do
-        local boss = game.Workspace.NPCs.Boss:FindFirstChild(bossName)
-        if boss then
-            pcall(function()
-                if _G.EnableBossHitboxes then
-                    updateBossHitbox(boss)
-                else
-                    resetHitbox(boss)
-                end
-            end)
+    for _, npc in ipairs(game.Workspace.NPCs:GetChildren()) do
+        if npc:IsA("Model") then
+            if _G.EnableMinionHitboxes and table.find({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}, npc.Name) then
+                pcall(function()
+                    updateMinionHitbox(npc)
+                end)
+            elseif _G.EnableBossHitboxes and table.find({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}, npc.Name) then
+                pcall(function()
+                    updateBossHitbox(npc)
+                end)
+            else
+                resetHitbox(npc)
+            end
         end
     end
 end
