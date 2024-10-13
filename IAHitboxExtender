@@ -54,38 +54,31 @@ end
 
 -- Функция для обновления всех NPC
 local function updateAllNPCs()
-    if _G.EnabledLos then
-        -- Обработка миньёнов
-        for _, minionName in ipairs({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}) do
-            local minion = game.Workspace.NPCs:FindFirstChild(minionName)
-            if minion then
-                pcall(function()
-                    if _G.EnableMinionHitboxes then
-                        updateMinionHitbox(minion)
-                    else
-                        resetHitbox(minion)
-                    end
-                end)
-            end
+    -- Обработка миньёнов
+    for _, minionName in ipairs({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}) do
+        local minion = game.Workspace.NPCs:FindFirstChild(minionName)
+        if minion then
+            pcall(function()
+                if _G.EnableMinionHitboxes then
+                    updateMinionHitbox(minion)
+                else
+                    resetHitbox(minion)
+                end
+            end)
         end
+    end
 
-        -- Обработка боссов
-        for _, bossName in ipairs({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}) do
-            local boss = game.Workspace.NPCs.Boss:FindFirstChild(bossName)
-            if boss then
-                pcall(function()
-                    if _G.EnableBossHitboxes then
-                        updateBossHitbox(boss)
-                    else
-                        resetHitbox(boss)
-                    end
-                end)
-            end
-        end
-    else
-        -- Сброс всех хитбоксов при отключении LOS
-        for _, npc in ipairs(game.Workspace.NPCs:GetChildren()) do
-            resetHitbox(npc)
+    -- Обработка боссов
+    for _, bossName in ipairs({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}) do
+        local boss = game.Workspace.NPCs.Boss:FindFirstChild(bossName)
+        if boss then
+            pcall(function()
+                if _G.EnableBossHitboxes then
+                    updateBossHitbox(boss)
+                else
+                    resetHitbox(boss)
+                end
+            end)
         end
     end
 end
@@ -101,15 +94,13 @@ end)
 -- Подписка на событие добавления NPC
 game.Workspace.NPCs.ChildAdded:Connect(function(npc)
     wait(0.1)
-    if _G.EnabledLos then
-        if _G.EnableMinionHitboxes and npc:IsA("Model") and table.find({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}, npc.Name) then
-            pcall(function()
-                updateMinionHitbox(npc)
-            end)
-        elseif _G.EnableBossHitboxes and npc:IsA("Model") and table.find({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}, npc.Name) then
-            pcall(function()
-                updateBossHitbox(npc)
-            end)
-        end
+    if _G.EnableMinionHitboxes and npc:IsA("Model") and table.find({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}, npc.Name) then
+        pcall(function()
+            updateMinionHitbox(npc)
+        end)
+    elseif _G.EnableBossHitboxes and npc:IsA("Model") and table.find({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}, npc.Name) then
+        pcall(function()
+            updateBossHitbox(npc)
+        end)
     end
 end)
