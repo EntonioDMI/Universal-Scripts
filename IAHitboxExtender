@@ -7,8 +7,10 @@ local function resetHitbox(npc)
     if npc:FindFirstChild("HumanoidRootPart") then
         local rootPart = npc.HumanoidRootPart
         rootPart.Size = Vector3.new(2, 2, 1) -- Оригинальный размер
-        rootPart.Transparency = 1
+        rootPart.Transparency = 0 -- Возвращаем непрозрачность
         rootPart.Material = "Plastic"
+        rootPart.Color = Color3.new(1, 1, 1) -- Возвращаем белый цвет
+        rootPart.CanCollide = true -- Восстанавливаем столкновение
     end
 end
 
@@ -83,24 +85,28 @@ local function updateAllNPCs()
     end
 end
 
--- Запуск цикла для обновления хитбоксов каждые 1 секунду
+-- Запуск цикла для обновления хитбоксов каждые 0.5 секунды
 spawn(function()
     while true do
         updateAllNPCs()
-        wait(1) -- Обновление каждые 1 секунду
+        wait(0.5) -- Обновление каждые 0.5 секунды для более быстрого реагирования
     end
 end)
 
 -- Подписка на событие добавления NPC
 game.Workspace.NPCs.ChildAdded:Connect(function(npc)
     wait(0.1)
-    if _G.EnableMinionHitboxes and npc:IsA("Model") and table.find({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}, npc.Name) then
-        pcall(function()
-            updateMinionHitbox(npc)
-        end)
-    elseif _G.EnableBossHitboxes and npc:IsA("Model") and table.find({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}, npc.Name) then
-        pcall(function()
-            updateBossHitbox(npc)
-        end)
+    if npc:IsA("Model") then
+        if _G.EnableMinionHitboxes and table.find({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}, npc.Name) then
+            pcall(function()
+                updateMinionHitbox(npc)
+            end)
+        elseif _G.EnableBossHitboxes and table.find({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}, npc.Name) then
+            pcall(function()
+                updateBossHitbox(npc)
+            end)
+        else
+            resetHitbox(npc)
+        end
     end
 end)
