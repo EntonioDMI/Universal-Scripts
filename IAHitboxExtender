@@ -56,19 +56,25 @@ end
 
 -- Функция для обновления всех NPC
 local function updateAllNPCs()
-    for _, npc in ipairs(game.Workspace.NPCs:GetChildren()) do
-        if npc:IsA("Model") then
-            if table.find({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}, npc.Name) then
-                if _G.EnableMinionHitboxes then
-                    updateMinionHitbox(npc)
-                else
-                    resetHitbox(npc)
-                end
-            elseif table.find({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}, npc.Name) then
+    -- Обработка миньёнов
+    for _, minion in ipairs(game.Workspace.NPCs:GetChildren()) do
+        if minion:IsA("Model") and table.find({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}, minion.Name) then
+            if _G.EnableMinionHitboxes then
+                updateMinionHitbox(minion)
+            else
+                resetHitbox(minion)
+            end
+        end
+    end
+
+    -- Обработка боссов
+    if game.Workspace.NPCs:FindFirstChild("Boss") then
+        for _, boss in ipairs(game.Workspace.NPCs.Boss:GetChildren()) do
+            if boss:IsA("Model") and table.find({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}, boss.Name) then
                 if _G.EnableBossHitboxes then
-                    updateBossHitbox(npc)
+                    updateBossHitbox(boss)
                 else
-                    resetHitbox(npc)
+                    resetHitbox(boss)
                 end
             end
         end
@@ -93,7 +99,7 @@ game.Workspace.NPCs.ChildAdded:Connect(function(npc)
             else
                 resetHitbox(npc)
             end
-        elseif table.find({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}, npc.Name) then
+        elseif game.Workspace.NPCs:FindFirstChild("Boss") and table.find({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}, npc.Name) then
             if _G.EnableBossHitboxes then
                 updateBossHitbox(npc)
             else
