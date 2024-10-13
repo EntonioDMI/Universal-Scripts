@@ -1,5 +1,5 @@
 -- Переменные для управления хитбоксами
-_G.Enabled = true
+_G.EnabledLos = true
 _G.EnableMinionHitboxes = true
 _G.MinionSize = 4
 _G.MinionTransparency = 0.5
@@ -53,7 +53,7 @@ end
 
 -- Функция для обновления всех NPC
 local function updateAllNPCs()
-    if _G.Enabled then
+    if _G.EnabledLos then
         -- Обработка миньёнов
         if _G.EnableMinionHitboxes then
             for _, minionName in ipairs({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}) do
@@ -96,7 +96,7 @@ end)
 -- Подписка на событие добавления NPC
 game.Workspace.NPCs.ChildAdded:Connect(function(npc)
     wait(0.1)
-    if _G.Enabled then
+    if _G.EnabledLos then
         if _G.EnableMinionHitboxes and npc:IsA("Model") and table.find({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}, npc.Name) then
             pcall(function()
                 updateMinionHitbox(npc)
