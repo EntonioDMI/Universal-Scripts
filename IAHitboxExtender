@@ -1,7 +1,6 @@
 -- Общий цвет и материал для всех хитбоксов
 local hitboxColor = Color3.new(1, 1, 1) -- Белый цвет по умолчанию
 local hitboxMaterial = "Neon"
-_G.enableLos = true
 
 -- Функция для сброса хитбоксов NPC к оригинальным параметрам
 local function resetHitbox(npc)
