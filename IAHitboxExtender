@@ -1,7 +1,16 @@
-
 -- Общий цвет и материал для всех хитбоксов
-local hitboxColor = Color3.new(1, 1, 1) -- Белый цвет
+local hitboxColor = Color3.new(1, 1, 1) -- Белый цвет по умолчанию
 local hitboxMaterial = "Neon"
+
+-- Инициализация глобальных переменных с значениями по умолчанию
+_G.MinionSize = _G.MinionSize or 3
+_G.BossSize = _G.BossSize or 5
+_G.MinionTransparency = _G.MinionTransparency or 0.5
+_G.BossTransparency = _G.BossTransparency or 0.5
+_G.EnabledLos = _G.EnabledLos or true
+_G.EnableMinionHitboxes = _G.EnableMinionHitboxes or true
+_G.EnableBossHitboxes = _G.EnableBossHitboxes or true
+_G.ScriptEnabled = _G.ScriptEnabled or true -- Новая переменная для включения/выключения скрипта
 
 -- Функция для сброса хитбоксов NPC к оригинальным параметрам
 local function resetHitbox(npc)
@@ -37,7 +46,18 @@ local function updateBossHitbox(boss)
         local rootPart = boss.HumanoidRootPart
         rootPart.Size = Vector3.new(_G.BossSize, _G.BossSize, _G.BossSize)
         rootPart.Transparency = _G.BossTransparency
-        rootPart.Color = hitboxColor
+
+        -- Установка цвета в зависимости от имени босса
+        if boss.Name == "Jean" or boss.Name == "JeanRBLX" then
+            rootPart.Color = Color3.new(0, 1, 0) -- Зеленый
+        elseif boss.Name == "Port" or boss.Name == "PortABoi" then
+            rootPart.Color = Color3.new(0, 0, 1) -- Синий
+        elseif boss.Name == "Xerroz" then
+            rootPart.Color = Color3.new(0.5, 0, 0.5) -- Фиолетовый
+        else
+            rootPart.Color = hitboxColor -- Цвет по умолчанию
+        end
+
         rootPart.Material = hitboxMaterial
     end
 end
@@ -59,7 +79,7 @@ local function updateAllNPCs()
 
         -- Обработка боссов
         if _G.EnableBossHitboxes then
-            for _, bossName in ipairs({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi", "Xerroz"}) do
+            for _, bossName in ipairs({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}) do
                 local boss = game.Workspace.NPCs.Boss:FindFirstChild(bossName)
                 if boss then
                     pcall(function()
@@ -76,23 +96,25 @@ local function updateAllNPCs()
     end
 end
 
--- Запуск цикла для обновления хитбоксов каждые 5 секунд
+-- Запуск цикла для обновления хитбоксов каждые 1 секунду
 spawn(function()
     while true do
-        updateAllNPCs()
-        wait(5) -- Обновление каждые 5 секунд
+        if _G.ScriptEnabled then
+            updateAllNPCs()
+        end
+        wait(1) -- Обновление каждые 1 секунду
     end
 end)
 
 -- Подписка на событие добавления NPC
 game.Workspace.NPCs.ChildAdded:Connect(function(npc)
     wait(0.1)
-    if _G.EnabledLos then
+    if _G.ScriptEnabled and _G.EnabledLos then
         if _G.EnableMinionHitboxes and npc:IsA("Model") and table.find({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}, npc.Name) then
             pcall(function()
                 updateMinionHitbox(npc)
             end)
-        elseif _G.EnableBossHitboxes and npc:IsA("Model") and table.find({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi", "Xerroz"}, npc.Name) then
+        elseif _G.EnableBossHitboxes and npc:IsA("Model") and table.find({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}, npc.Name) then
             pcall(function()
                 updateBossHitbox(npc)
             end)
