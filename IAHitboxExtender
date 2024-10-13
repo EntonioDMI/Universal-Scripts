@@ -1,3 +1,5 @@
+-- Основной скрипт
+
 -- Общий цвет и материал для всех хитбоксов
 local hitboxColor = Color3.new(1, 1, 1) -- Белый цвет по умолчанию
 local hitboxMaterial = "Neon"
@@ -89,9 +91,7 @@ end
 -- Запуск цикла для обновления хитбоксов каждые 1 секунду
 spawn(function()
     while true do
-        if _G.ScriptEnabled then
-            updateAllNPCs()
-        end
+        updateAllNPCs()
         wait(1) -- Обновление каждые 1 секунду
     end
 end)
@@ -99,7 +99,7 @@ end)
 -- Подписка на событие добавления NPC
 game.Workspace.NPCs.ChildAdded:Connect(function(npc)
     wait(0.1)
-    if _G.ScriptEnabled and _G.EnabledLos then
+    if _G.EnabledLos then
         if _G.EnableMinionHitboxes and npc:IsA("Model") and table.find({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}, npc.Name) then
             pcall(function()
                 updateMinionHitbox(npc)
