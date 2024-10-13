@@ -1,10 +1,5 @@
--- Основной скрипт для управления хитбоксами
-
 -- Функция для сброса хитбоксов тиммейтов
-local function resetTeamHitboxes()
-    local localPlayer = game:GetService('Players').LocalPlayer
-    local localTeam = localPlayer.Team
-
+local function resetTeamHitboxes(localPlayer, localTeam)
     for _, v in ipairs(game:GetService('Players'):GetPlayers()) do
         if v ~= localPlayer and v.Team == localTeam and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
             local rootPart = v.Character.HumanoidRootPart
@@ -16,15 +11,15 @@ local function resetTeamHitboxes()
 end
 
 -- Основной код для управления хитбоксами
-local function updateHitbox(v)
+local function updateHitbox(v, headSize, hitboxTransparency, hitboxColor)
     if v ~= game:GetService('Players').LocalPlayer and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") then
         local humanoid = v.Character.Humanoid
         local rootPart = v.Character.HumanoidRootPart
 
         if humanoid.Health > 0 then
-            rootPart.Size = Vector3.new(_G.HeadSize, _G.HeadSize, _G.HeadSize)
-            rootPart.Transparency = _G.HitboxTransparency
-            rootPart.Color = _G.HitboxColor
+            rootPart.Size = Vector3.new(headSize, headSize, headSize)
+            rootPart.Transparency = hitboxTransparency
+            rootPart.Color = hitboxColor
             rootPart.Material = "Neon"
             rootPart.CanCollide = false
         else
@@ -36,21 +31,29 @@ end
 
 -- Запуск цикла для сброса хитбоксов
 game:GetService('RunService').Heartbeat:Connect(function(deltaTime)
-    if _G.TeamCheck then
-        resetTeamHitboxes()
+    local localPlayer = game:GetService('Players').LocalPlayer
+    local localTeam = localPlayer.Team
+    local teamCheck = true -- Настройка для проверки команды
+
+    if teamCheck then
+        resetTeamHitboxes(localPlayer, localTeam)
     end
 end)
 
 game:GetService('RunService').RenderStepped:Connect(function()
     local localPlayer = game:GetService('Players').LocalPlayer
     local localTeam = localPlayer.Team
+    local disabled = false -- Настройка для отключения
+    local headSize = 2 -- Размер хитбокса
+    local hitboxTransparency = 0.5 -- Прозрачность хитбокса
+    local hitboxColor = Color3.new(1, 0, 0) -- Цвет хитбокса
 
     for _, v in ipairs(game:GetService('Players'):GetPlayers()) do
         if v.Name ~= localPlayer.Name then
-            local isSameTeam = _G.TeamCheck and v.Team == localTeam
-            if not _G.Disabled and not isSameTeam then
+            local isSameTeam = teamCheck and v.Team == localTeam
+            if not disabled and not isSameTeam then
                 pcall(function()
-                    updateHitbox(v)
+                    updateHitbox(v, headSize, hitboxTransparency, hitboxColor)
                 end)
             end
         end
@@ -60,9 +63,14 @@ end)
 game:GetService('Players').PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function(character)
         wait(0.1)
-        if not _G.Disabled then
+        local disabled = false -- Настройка для отключения
+        local headSize = 2 -- Размер хитбокса
+        local hitboxTransparency = 0.5 -- Прозрачность хитбокса
+        local hitboxColor = Color3.new(1, 0, 0) -- Цвет хитбокса
+
+        if not disabled then
             pcall(function()
-                updateHitbox(player)
+                updateHitbox(player, headSize, hitboxTransparency, hitboxColor)
             end)
         end
 
