@@ -58,16 +58,18 @@ end
 local function updateAllNPCs()
     for _, npc in ipairs(game.Workspace.NPCs:GetChildren()) do
         if npc:IsA("Model") then
-            if _G.EnableMinionHitboxes and table.find({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}, npc.Name) then
-                pcall(function()
+            if table.find({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}, npc.Name) then
+                if _G.EnableMinionHitboxes then
                     updateMinionHitbox(npc)
-                end)
-            elseif _G.EnableBossHitboxes and table.find({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}, npc.Name) then
-                pcall(function()
+                else
+                    resetHitbox(npc)
+                end
+            elseif table.find({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}, npc.Name) then
+                if _G.EnableBossHitboxes then
                     updateBossHitbox(npc)
-                end)
-            else
-                resetHitbox(npc)
+                else
+                    resetHitbox(npc)
+                end
             end
         end
     end
@@ -85,16 +87,18 @@ end)
 game.Workspace.NPCs.ChildAdded:Connect(function(npc)
     wait(0.1)
     if npc:IsA("Model") then
-        if _G.EnableMinionHitboxes and table.find({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}, npc.Name) then
-            pcall(function()
+        if table.find({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}, npc.Name) then
+            if _G.EnableMinionHitboxes then
                 updateMinionHitbox(npc)
-            end)
-        elseif _G.EnableBossHitboxes and table.find({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}, npc.Name) then
-            pcall(function()
+            else
+                resetHitbox(npc)
+            end
+        elseif table.find({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}, npc.Name) then
+            if _G.EnableBossHitboxes then
                 updateBossHitbox(npc)
-            end)
-        else
-            resetHitbox(npc)
+            else
+                resetHitbox(npc)
+            end
         end
     end
 end)
