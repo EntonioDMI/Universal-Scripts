@@ -1,12 +1,3 @@
--- Переменные для управления хитбоксами
-_G.EnabledLos = true
-_G.EnableMinionHitboxes = true
-_G.MinionSize = 4
-_G.MinionTransparency = 0.5
-
-_G.EnableBossHitboxes = true
-_G.BossSize = 6
-_G.BossTransparency = 0.3
 
 -- Общий цвет и материал для всех хитбоксов
 local hitboxColor = Color3.new(1, 1, 1) -- Белый цвет
