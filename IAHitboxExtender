@@ -1,5 +1,3 @@
--- Основной скрипт
-
 -- Общий цвет и материал для всех хитбоксов
 local hitboxColor = Color3.new(1, 1, 1) -- Белый цвет по умолчанию
 local hitboxMaterial = "Neon"
@@ -67,6 +65,16 @@ local function updateAllNPCs()
                     end)
                 end
             end
+        else
+            -- Сброс миньёнов при отключении
+            for _, minionName in ipairs({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}) do
+                local minion = game.Workspace.NPCs:FindFirstChild(minionName)
+                if minion then
+                    pcall(function()
+                        resetHitbox(minion)
+                    end)
+                end
+            end
         end
 
         -- Обработка боссов
@@ -79,9 +87,19 @@ local function updateAllNPCs()
                     end)
                 end
             end
+        else
+            -- Сброс боссов при отключении
+            for _, bossName in ipairs({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}) do
+                local boss = game.Workspace.NPCs.Boss:FindFirstChild(bossName)
+                if boss then
+                    pcall(function()
+                        resetHitbox(boss)
+                    end)
+                end
+            end
         end
     else
-        -- Сброс всех хитбоксов при отключении
+        -- Сброс всех хитбоксов при отключении LOS
         for _, npc in ipairs(game.Workspace.NPCs:GetChildren()) do
             resetHitbox(npc)
         end
