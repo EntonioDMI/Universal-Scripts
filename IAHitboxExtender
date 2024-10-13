@@ -2,16 +2,6 @@
 local hitboxColor = Color3.new(1, 1, 1) -- Белый цвет по умолчанию
 local hitboxMaterial = "Neon"
 
--- Инициализация глобальных переменных с значениями по умолчанию
-_G.MinionSize = _G.MinionSize or 3
-_G.BossSize = _G.BossSize or 5
-_G.MinionTransparency = _G.MinionTransparency or 0.5
-_G.BossTransparency = _G.BossTransparency or 0.5
-_G.EnabledLos = _G.EnabledLos or true
-_G.EnableMinionHitboxes = _G.EnableMinionHitboxes or true
-_G.EnableBossHitboxes = _G.EnableBossHitboxes or true
-_G.ScriptEnabled = _G.ScriptEnabled or true -- Новая переменная для включения/выключения скрипта
-
 -- Функция для сброса хитбоксов NPC к оригинальным параметрам
 local function resetHitbox(npc)
     if npc:FindFirstChild("HumanoidRootPart") then
