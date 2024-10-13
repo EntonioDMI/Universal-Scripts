@@ -1,113 +1,113 @@
-   -- Основной скрипт
+-- Основной скрипт
 
-   -- Общий цвет и материал для всех хитбоксов
-   local hitboxColor = Color3.new(1, 1, 1) -- Белый цвет по умолчанию
-   local hitboxMaterial = "Neon"
+-- Общий цвет и материал для всех хитбоксов
+local hitboxColor = Color3.new(1, 1, 1) -- Белый цвет по умолчанию
+local hitboxMaterial = "Neon"
 
-   -- Функция для сброса хитбоксов NPC к оригинальным параметрам
-   local function resetHitbox(npc)
-       if npc:FindFirstChild("HumanoidRootPart") then
-           local rootPart = npc.HumanoidRootPart
-           rootPart.Size = Vector3.new(2, 2, 1) -- Оригинальный размер
-           rootPart.Transparency = 1
-           rootPart.Material = "Plastic"
-       end
-   end
+-- Функция для сброса хитбоксов NPC к оригинальным параметрам
+local function resetHitbox(npc)
+    if npc:FindFirstChild("HumanoidRootPart") then
+        local rootPart = npc.HumanoidRootPart
+        rootPart.Size = Vector3.new(2, 2, 1) -- Оригинальный размер
+        rootPart.Transparency = 1
+        rootPart.Material = "Plastic"
+    end
+end
 
-   -- Функция для обновления хитбоксов миньёнов
-   local function updateMinionHitbox(minion)
-       if minion:FindFirstChild("Humanoid") and minion:FindFirstChild("HumanoidRootPart") then
-           local humanoid = minion.Humanoid
-           local rootPart = minion.HumanoidRootPart
+-- Функция для обновления хитбоксов миньёнов
+local function updateMinionHitbox(minion)
+    if minion:FindFirstChild("Humanoid") and minion:FindFirstChild("HumanoidRootPart") then
+        local humanoid = minion.Humanoid
+        local rootPart = minion.HumanoidRootPart
 
-           if humanoid.Health > 0 then
-               rootPart.Size = Vector3.new(_G.MinionSize, _G.MinionSize, _G.MinionSize)
-               rootPart.Transparency = _G.MinionTransparency
-               rootPart.Color = hitboxColor
-               rootPart.Material = hitboxMaterial
-               rootPart.CanCollide = false
-           else
-               resetHitbox(minion)
-           end
-       end
-   end
+        if humanoid.Health > 0 then
+            rootPart.Size = Vector3.new(_G.MinionSize, _G.MinionSize, _G.MinionSize)
+            rootPart.Transparency = _G.MinionTransparency
+            rootPart.Color = hitboxColor
+            rootPart.Material = hitboxMaterial
+            rootPart.CanCollide = false
+        else
+            resetHitbox(minion)
+        end
+    end
+end
 
-   -- Функция для обновления хитбоксов боссов
-   local function updateBossHitbox(boss)
-       if boss:FindFirstChild("HumanoidRootPart") then
-           local rootPart = boss.HumanoidRootPart
-           rootPart.Size = Vector3.new(_G.BossSize, _G.BossSize, _G.BossSize)
-           rootPart.Transparency = _G.BossTransparency
+-- Функция для обновления хитбоксов боссов
+local function updateBossHitbox(boss)
+    if boss:FindFirstChild("HumanoidRootPart") then
+        local rootPart = boss.HumanoidRootPart
+        rootPart.Size = Vector3.new(_G.BossSize, _G.BossSize, _G.BossSize)
+        rootPart.Transparency = _G.BossTransparency
 
-           -- Установка цвета в зависимости от имени босса
-           if boss.Name == "Jean" or boss.Name == "JeanRBLX" then
-               rootPart.Color = Color3.new(0, 1, 0) -- Зеленый
-           elseif boss.Name == "Port" or boss.Name == "PortABoi" then
-               rootPart.Color = Color3.new(0, 0, 1) -- Синий
-           elseif boss.Name == "Xerroz" then
-               rootPart.Color = Color3.new(0.5, 0, 0.5) -- Фиолетовый
-           else
-               rootPart.Color = hitboxColor -- Цвет по умолчанию
-           end
+        -- Установка цвета в зависимости от имени босса
+        if boss.Name == "Jean" or boss.Name == "JeanRBLX" then
+            rootPart.Color = Color3.new(0, 1, 0) -- Зеленый
+        elseif boss.Name == "Port" or boss.Name == "PortABoi" then
+            rootPart.Color = Color3.new(0, 0, 1) -- Синий
+        elseif boss.Name == "Xerroz" then
+            rootPart.Color = Color3.new(0.5, 0, 0.5) -- Фиолетовый
+        else
+            rootPart.Color = hitboxColor -- Цвет по умолчанию
+        end
 
-           rootPart.Material = hitboxMaterial
-       end
-   end
+        rootPart.Material = hitboxMaterial
+    end
+end
 
-   -- Функция для обновления всех NPC
-   local function updateAllNPCs()
-       if _G.EnabledLos then
-           -- Обработка миньёнов
-           if _G.EnableMinionHitboxes then
-               for _, minionName in ipairs({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}) do
-                   local minion = game.Workspace.NPCs:FindFirstChild(minionName)
-                   if minion then
-                       pcall(function()
-                           updateMinionHitbox(minion)
-                       end)
-                   end
-               end
-           end
+-- Функция для обновления всех NPC
+local function updateAllNPCs()
+    if _G.EnabledLos then
+        -- Обработка миньёнов
+        if _G.EnableMinionHitboxes then
+            for _, minionName in ipairs({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}) do
+                local minion = game.Workspace.NPCs:FindFirstChild(minionName)
+                if minion then
+                    pcall(function()
+                        updateMinionHitbox(minion)
+                    end)
+                end
+            end
+        end
 
-           -- Обработка боссов
-           if _G.EnableBossHitboxes then
-               for _, bossName in ipairs({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}) do
-                   local boss = game.Workspace.NPCs.Boss:FindFirstChild(bossName)
-                   if boss then
-                       pcall(function()
-                           updateBossHitbox(boss)
-                       end)
-                   end
-               end
-           end
-       else
-           -- Сброс всех хитбоксов при отключении
-           for _, npc in ipairs(game.Workspace.NPCs:GetChildren()) do
-               resetHitbox(npc)
-           end
-       end
-   end
+        -- Обработка боссов
+        if _G.EnableBossHitboxes then
+            for _, bossName in ipairs({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}) do
+                local boss = game.Workspace.NPCs.Boss:FindFirstChild(bossName)
+                if boss then
+                    pcall(function()
+                        updateBossHitbox(boss)
+                    end)
+                end
+            end
+        end
+    else
+        -- Сброс всех хитбоксов при отключении
+        for _, npc in ipairs(game.Workspace.NPCs:GetChildren()) do
+            resetHitbox(npc)
+        end
+    end
+end
 
-   -- Запуск цикла для обновления хитбоксов каждые 1 секунду
-   spawn(function()
-       while true do
-           updateAllNPCs()
-           wait(1) -- Обновление каждые 1 секунду
-       end
-   end)
+-- Запуск цикла для обновления хитбоксов каждые 1 секунду
+spawn(function()
+    while true do
+        updateAllNPCs()
+        wait(1) -- Обновление каждые 1 секунду
+    end
+end)
 
-   -- Подписка на событие добавления NPC
-   game.Workspace.NPCs.ChildAdded:Connect(function(npc)
-       wait(0.1)
-       if _G.EnabledLos then
-           if _G.EnableMinionHitboxes and npc:IsA("Model") and table.find({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}, npc.Name) then
-               pcall(function()
-                   updateMinionHitbox(npc)
-               end)
-           elseif _G.EnableBossHitboxes and npc:IsA("Model") and table.find({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}, npc.Name) then
-               pcall(function()
-                   updateBossHitbox(npc)
-               end)
-           end
-       end
-   end)
+-- Подписка на событие добавления NPC
+game.Workspace.NPCs.ChildAdded:Connect(function(npc)
+    wait(0.1)
+    if _G.EnabledLos then
+        if _G.EnableMinionHitboxes and npc:IsA("Model") and table.find({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}, npc.Name) then
+            pcall(function()
+                updateMinionHitbox(npc)
+            end)
+        elseif _G.EnableBossHitboxes and npc:IsA("Model") and table.find({"10 Hour Burst Man", "Specimen9", "Klevinoroto", "SlungusPrism", "ManOfNature", "Matter", "Ithor", "SKELETON", "Jean", "Port", "Xerroz", "Weegee", "JeanRBLX", "PortABoi"}, npc.Name) then
+            pcall(function()
+                updateBossHitbox(npc)
+            end)
+        end
+    end
+end)
