@@ -58,7 +58,7 @@ end
 local function updateAllNPCs()
     -- Обработка миньёнов
     for _, minion in ipairs(game.Workspace.NPCs:GetChildren()) do
-        if minion:IsA("Model") and table.find({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "Kami Dummy", "Combat Mage", "Combat Vampire"}, minion.Name) then
+        if minion:IsA("Model") and table.find({"Chicken", "Rat", "Pig", "BruteMinion", "Minion", "Combat Soldier", "Combat Dummy", "KamiDummy", "Combat Mage", "Combat Vampire"}, minion.Name) then
             if _G.EnableMinionHitboxes then
                 updateMinionHitbox(minion)
             else
