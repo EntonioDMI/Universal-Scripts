@@ -2,37 +2,43 @@ local RunService = game:GetService("RunService")
 local player = game.Players.LocalPlayer
 
 local function modifyPlayerAttributes()
-    local character = player.Character or player.CharacterAdded:Wait()
-    local humanoid = character:WaitForChild("Humanoid")
-    local rootPart = character:WaitForChild("HumanoidRootPart")
+    local function onCharacterAdded(character)
+        local humanoid = character:WaitForChild("Humanoid")
+        local rootPart = character:WaitForChild("HumanoidRootPart")
 
-    local originalWalkSpeed = humanoid.WalkSpeed
-    local originalJumpPower = humanoid.JumpPower
+        local originalWalkSpeed = humanoid.WalkSpeed
+        local originalJumpPower = humanoid.JumpPower
 
-    -- Function to apply speed and jump changes
-    local function applyChanges()
-        while true do
-            if _G.PlayerSpeedEnabled then
-                if humanoid.WalkSpeed ~= _G.PlayerSpeed then
-                    humanoid.WalkSpeed = _G.PlayerSpeed
+        local function applyChanges()
+            while true do
+                if _G.PlayerSpeedEnabled then
+                    if humanoid.WalkSpeed ~= _G.PlayerSpeed then
+                        humanoid.WalkSpeed = _G.PlayerSpeed
+                    end
+                    if humanoid.JumpPower ~= _G.PlayerJumpHeight then
+                        humanoid.JumpPower = _G.PlayerJumpHeight
+                    end
+                else
+                    if humanoid.WalkSpeed ~= originalWalkSpeed then
+                        humanoid.WalkSpeed = originalWalkSpeed
+                    end
+                    if humanoid.JumpPower ~= originalJumpPower then
+                        humanoid.JumpPower = originalJumpPower
+                    end
                 end
-                if humanoid.JumpPower ~= _G.PlayerJumpHeight then
-                    humanoid.JumpPower = _G.PlayerJumpHeight
-                end
-            else
-                if humanoid.WalkSpeed ~= originalWalkSpeed then
-                    humanoid.WalkSpeed = originalWalkSpeed
-                end
-                if humanoid.JumpPower ~= originalJumpPower then
-                    humanoid.JumpPower = originalJumpPower
-                end
+                RunService.Heartbeat:Wait()
             end
-            RunService.Heartbeat:Wait() -- Wait for the next frame
         end
+
+        coroutine.wrap(applyChanges)()
     end
 
-    -- Start the applyChanges function in a separate thread
-    coroutine.wrap(applyChanges)()
+    player.CharacterAdded:Connect(onCharacterAdded)
+
+    -- If the character already exists, apply changes immediately
+    if player.Character then
+        onCharacterAdded(player.Character)
+    end
 end
 
 modifyPlayerAttributes()
