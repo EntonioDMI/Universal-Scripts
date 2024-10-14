@@ -7,10 +7,14 @@ local function modifyPlayerAttributes()
     local originalJumpPower
 
     local function applyCustomAttributes()
-        if _G.PlayerSpeedEnabled and humanoid then
+        if humanoid and _G.PlayerSpeedEnabled then
             humanoid.WalkSpeed = _G.PlayerSpeed
             humanoid.JumpPower = _G.PlayerJumpHeight
-        elseif humanoid then
+        end
+    end
+
+    local function restoreOriginalAttributes()
+        if humanoid and not _G.PlayerSpeedEnabled then
             humanoid.WalkSpeed = originalWalkSpeed
             humanoid.JumpPower = originalJumpPower
         end
@@ -21,24 +25,19 @@ local function modifyPlayerAttributes()
         originalWalkSpeed = humanoid.WalkSpeed
         originalJumpPower = humanoid.JumpPower
 
-        humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
-            if not _G.PlayerSpeedEnabled then
-                originalWalkSpeed = humanoid.WalkSpeed
+        -- React to changes in _G.PlayerSpeedEnabled
+        RunService.Heartbeat:Connect(function()
+            if _G.PlayerSpeedEnabled then
+                applyCustomAttributes()
+            else
+                restoreOriginalAttributes()
             end
         end)
-
-        humanoid:GetPropertyChangedSignal("JumpPower"):Connect(function()
-            if not _G.PlayerSpeedEnabled then
-                originalJumpPower = humanoid.JumpPower
-            end
-        end)
-
-        RunService.Heartbeat:Connect(applyCustomAttributes)
     end
 
     player.CharacterAdded:Connect(onCharacterAdded)
 
-    -- Если персонаж уже существует, применяем изменения сразу
+    -- If the character already exists, apply changes immediately
     if player.Character then
         onCharacterAdded(player.Character)
     end
