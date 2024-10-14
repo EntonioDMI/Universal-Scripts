@@ -1,32 +1,38 @@
-local RunService = game:GetService("RunService")
+-- Локальный скрипт для симуляции увеличения скорости игрока в Roblox
+
+-- Флаг для включения/отключения модификации
+local MyScriptPlayerChangeModificatorEnabled = false
+
+-- Новая скорость для симуляции
+local MyScriptPlayerSpeed = 32 -- Увеличенная скорость
+
+-- Получаем игрока
 local player = game.Players.LocalPlayer
 
--- Уникальные имена для глобальных переменных
-_G.MyUniqueSpeedEnabled = false
-_G.MyUniqueSpeed = 16
+-- Функция для симуляции увеличения скорости
+local function simulateSpeedIncrease(character)
+    if MyScriptPlayerChangeModificatorEnabled then
+        -- Ждем, пока Humanoid не станет доступным
+        local humanoid = character:WaitForChild("Humanoid")
+        local rootPart = character:WaitForChild("HumanoidRootPart")
 
-local function applyCustomAttributes(humanoid)
-    if _G.MyUniqueSpeedEnabled then
-        humanoid.WalkSpeed = _G.MyUniqueSpeed
+        -- Подключаем функцию к RenderStepped для постоянного изменения позиции
+        local connection
+        connection = game:GetService("RunService").RenderStepped:Connect(function()
+            if MyScriptPlayerChangeModificatorEnabled and humanoid and rootPart then
+                -- Вычисляем вектор движения
+                local moveDirection = humanoid.MoveDirection * (MyScriptPlayerSpeed - humanoid.WalkSpeed) * game:GetService("RunService").RenderStepped:Wait()
+                rootPart.CFrame = rootPart.CFrame + moveDirection
+            else
+                -- Отключаем подключение, если модификация выключена
+                connection:Disconnect()
+            end
+        end)
+
+        -- Выводим сообщение в консоль
+        print("Симуляция увеличения скорости игрока до: " .. MyScriptPlayerSpeed)
     end
 end
 
-local function onCharacterAdded(character)
-    local humanoid = character:WaitForChild("Humanoid")
-
-    local connection
-    connection = RunService.RenderStepped:Connect(function()
-        if _G.MyUniqueSpeedEnabled then
-            applyCustomAttributes(humanoid)
-        elseif connection then
-            connection:Disconnect()
-            connection = nil
-        end
-    end)
-end
-
-player.CharacterAdded:Connect(onCharacterAdded)
-
-if player.Character then
-    onCharacterAdded(player.Character)
-end
+-- Подключаем функцию к событию CharacterAdded
+player.CharacterAdded:Connect(simulateSpeedIncrease)
