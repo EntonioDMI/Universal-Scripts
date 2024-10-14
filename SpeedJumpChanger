@@ -1,33 +1,23 @@
 local RunService = game:GetService("RunService")
 local player = game.Players.LocalPlayer
 
--- Измененные имена глобальных переменных
-_G.MyScriptPlayerSpeedEnabled = false
-_G.MyScriptPlayerSpeed = 16 -- стандартная скорость
-_G.MyScriptPlayerJumpHeight = 50 -- стандартная высота прыжка
-
 local function modifyPlayerAttributes()
     local humanoid
     local originalWalkSpeed
     local originalJumpPower
+    local connection
 
-    local function updateAttributes()
+    local function applyCustomAttributes()
+        if humanoid and _G.MyScriptPlayerSpeedEnabled then
+            humanoid.WalkSpeed = _G.MyScriptPlayerSpeed
+            humanoid.JumpPower = _G.MyScriptPlayerJumpHeight
+        end
+    end
+
+    local function restoreOriginalAttributes()
         if humanoid then
-            if _G.MyScriptPlayerSpeedEnabled then
-                if humanoid.WalkSpeed ~= _G.MyScriptPlayerSpeed then
-                    humanoid.WalkSpeed = _G.MyScriptPlayerSpeed
-                end
-                if humanoid.JumpPower ~= _G.MyScriptPlayerJumpHeight then
-                    humanoid.JumpPower = _G.MyScriptPlayerJumpHeight
-                end
-            else
-                if humanoid.WalkSpeed ~= originalWalkSpeed then
-                    humanoid.WalkSpeed = originalWalkSpeed
-                end
-                if humanoid.JumpPower ~= originalJumpPower then
-                    humanoid.JumpPower = originalJumpPower
-                end
-            end
+            humanoid.WalkSpeed = originalWalkSpeed
+            humanoid.JumpPower = originalJumpPower
         end
     end
 
@@ -36,10 +26,18 @@ local function modifyPlayerAttributes()
         originalWalkSpeed = humanoid.WalkSpeed
         originalJumpPower = humanoid.JumpPower
 
-        updateAttributes() -- Применяем изменения при появлении персонажа
+        if connection then
+            connection:Disconnect()
+        end
 
-        -- Следим за изменениями переменных и обновляем атрибуты
-        RunService.Heartbeat:Connect(updateAttributes)
+        connection = RunService.Heartbeat:Connect(function()
+            if _G.MyScriptPlayerSpeedEnabled then
+                applyCustomAttributes()
+            else
+                restoreOriginalAttributes()
+                connection:Disconnect()  -- Останавливаем проверку после восстановления
+            end
+        end)
     end
 
     player.CharacterAdded:Connect(onCharacterAdded)
