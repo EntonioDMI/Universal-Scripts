@@ -1,4 +1,3 @@
-local RunService = game:GetService("RunService")
 local player = game.Players.LocalPlayer
 
 local function modifyPlayerAttributes()
@@ -9,19 +8,11 @@ local function modifyPlayerAttributes()
     local function updateAttributes()
         if humanoid then
             if _G.MyScriptPlayerSpeedEnabled then
-                if humanoid.WalkSpeed ~= _G.MyScriptPlayerSpeed then
-                    humanoid.WalkSpeed = _G.MyScriptPlayerSpeed
-                end
-                if humanoid.JumpPower ~= _G.MyScriptPlayerJumpHeight then
-                    humanoid.JumpPower = _G.MyScriptPlayerJumpHeight
-                end
+                humanoid.WalkSpeed = _G.MyScriptPlayerSpeed
+                humanoid.JumpPower = _G.MyScriptPlayerJumpHeight
             else
-                if humanoid.WalkSpeed ~= originalWalkSpeed then
-                    humanoid.WalkSpeed = originalWalkSpeed
-                end
-                if humanoid.JumpPower ~= originalJumpPower then
-                    humanoid.JumpPower = originalJumpPower
-                end
+                humanoid.WalkSpeed = originalWalkSpeed
+                humanoid.JumpPower = originalJumpPower
             end
         end
     end
@@ -32,7 +23,10 @@ local function modifyPlayerAttributes()
         originalJumpPower = humanoid.JumpPower
 
         -- Следим за изменениями переменных и обновляем атрибуты
-        RunService.Heartbeat:Connect(updateAttributes)
+        while true do
+            updateAttributes()
+            wait(0.1) -- Периодически проверяем состояние
+        end
     end
 
     player.CharacterAdded:Connect(onCharacterAdded)
