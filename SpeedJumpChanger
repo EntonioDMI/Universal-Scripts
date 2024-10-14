@@ -5,16 +5,17 @@ local function modifyPlayerAttributes()
     local humanoid
     local originalWalkSpeed
     local originalJumpPower
+    local connection
 
     local function applyCustomAttributes()
-        if humanoid and _G.PlayerSpeedEnabled then
+        if humanoid then
             humanoid.WalkSpeed = _G.PlayerSpeed
             humanoid.JumpPower = _G.PlayerJumpHeight
         end
     end
 
     local function restoreOriginalAttributes()
-        if humanoid and not _G.PlayerSpeedEnabled then
+        if humanoid then
             humanoid.WalkSpeed = originalWalkSpeed
             humanoid.JumpPower = originalJumpPower
         end
@@ -25,12 +26,16 @@ local function modifyPlayerAttributes()
         originalWalkSpeed = humanoid.WalkSpeed
         originalJumpPower = humanoid.JumpPower
 
-        -- React to changes in _G.PlayerSpeedEnabled
-        RunService.Heartbeat:Connect(function()
+        if connection then
+            connection:Disconnect()
+        end
+
+        connection = RunService.Heartbeat:Connect(function()
             if _G.PlayerSpeedEnabled then
                 applyCustomAttributes()
             else
                 restoreOriginalAttributes()
+                connection:Disconnect()  -- Stop checking once restored
             end
         end)
     end
