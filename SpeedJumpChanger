@@ -18,7 +18,7 @@ local function simulateSpeedIncrease(character)
     end)
 
     -- Подключаем функцию для отслеживания изменений в реальном времени
-    game:GetService("RunService").RenderStepped:Connect(function()
+    game:GetService("RunService").Stepped:Connect(function()
         if not _G.MyScriptPlayerChangeModificatorEnabled and connection then
             -- Отключаем подключение, если модификация выключена
             connection:Disconnect()
