@@ -9,17 +9,20 @@ local function modifyPlayerAttributes()
     local originalWalkSpeed = humanoid.WalkSpeed
     local originalJumpPower = humanoid.JumpPower
 
-    RunService.RenderStepped:Connect(function()
+    -- Function to apply speed and jump changes
+    local function applyChanges()
         if _G.PlayerSpeedEnabled then
             humanoid.WalkSpeed = _G.PlayerSpeed
-
-            if humanoid:GetState() == Enum.HumanoidStateType.Jumping then
-                rootPart.Velocity = Vector3.new(rootPart.Velocity.X, _G.PlayerJumpHeight, rootPart.Velocity.Z)
-            end
+            humanoid.JumpPower = _G.PlayerJumpHeight
         else
             humanoid.WalkSpeed = originalWalkSpeed
             humanoid.JumpPower = originalJumpPower
         end
+    end
+
+    -- Constantly check and apply changes
+    RunService.Heartbeat:Connect(function()
+        applyChanges()
     end)
 end
 
