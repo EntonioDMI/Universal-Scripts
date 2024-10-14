@@ -1,0 +1,26 @@
+local RunService = game:GetService("RunService")
+local player = game.Players.LocalPlayer
+
+local function modifyPlayerAttributes()
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+    local rootPart = character:WaitForChild("HumanoidRootPart")
+
+    local originalWalkSpeed = humanoid.WalkSpeed
+    local originalJumpPower = humanoid.JumpPower
+
+    RunService.RenderStepped:Connect(function()
+        if _G.PlayerSpeedEnabled then
+            humanoid.WalkSpeed = _G.PlayerSpeed
+
+            if humanoid:GetState() == Enum.HumanoidStateType.Jumping then
+                rootPart.Velocity = Vector3.new(rootPart.Velocity.X, _G.PlayerJumpHeight, rootPart.Velocity.Z)
+            end
+        else
+            humanoid.WalkSpeed = originalWalkSpeed
+            humanoid.JumpPower = originalJumpPower
+        end
+    end)
+end
+
+modifyPlayerAttributes()
