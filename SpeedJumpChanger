@@ -1,6 +1,11 @@
 local RunService = game:GetService("RunService")
 local player = game.Players.LocalPlayer
 
+-- Измененные имена глобальных переменных
+_G.MyScriptPlayerSpeedEnabled = false
+_G.MyScriptPlayerSpeed = 16 -- стандартная скорость
+_G.MyScriptPlayerJumpHeight = 50 -- стандартная высота прыжка
+
 local function modifyPlayerAttributes()
     local humanoid
     local originalWalkSpeed
@@ -9,11 +14,19 @@ local function modifyPlayerAttributes()
     local function updateAttributes()
         if humanoid then
             if _G.MyScriptPlayerSpeedEnabled then
-                humanoid.WalkSpeed = _G.MyScriptPlayerSpeed
-                humanoid.JumpPower = _G.MyScriptPlayerJumpHeight
+                if humanoid.WalkSpeed ~= _G.MyScriptPlayerSpeed then
+                    humanoid.WalkSpeed = _G.MyScriptPlayerSpeed
+                end
+                if humanoid.JumpPower ~= _G.MyScriptPlayerJumpHeight then
+                    humanoid.JumpPower = _G.MyScriptPlayerJumpHeight
+                end
             else
-                humanoid.WalkSpeed = originalWalkSpeed
-                humanoid.JumpPower = originalJumpPower
+                if humanoid.WalkSpeed ~= originalWalkSpeed then
+                    humanoid.WalkSpeed = originalWalkSpeed
+                end
+                if humanoid.JumpPower ~= originalJumpPower then
+                    humanoid.JumpPower = originalJumpPower
+                end
             end
         end
     end
