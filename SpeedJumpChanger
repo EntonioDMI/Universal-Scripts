@@ -8,14 +8,14 @@ local function modifyPlayerAttributes()
     local connection
 
     local function applyCustomAttributes()
-        if humanoid and _G.MyScriptPlayerSpeedEnabled then
+        if humanoid then
             humanoid.WalkSpeed = _G.MyScriptPlayerSpeed
             humanoid.JumpPower = _G.MyScriptPlayerJumpHeight
         end
     end
 
     local function restoreOriginalAttributes()
-        if humanoid and not _G.MyScriptPlayerSpeedEnabled then
+        if humanoid then
             humanoid.WalkSpeed = originalWalkSpeed
             humanoid.JumpPower = originalJumpPower
         end
@@ -35,14 +35,13 @@ local function modifyPlayerAttributes()
                 applyCustomAttributes()
             else
                 restoreOriginalAttributes()
-                connection:Disconnect()  -- Stop checking once restored
             end
         end)
     end
 
     player.CharacterAdded:Connect(onCharacterAdded)
 
-    -- If the character already exists, apply changes immediately
+    -- Если персонаж уже существует, применяем изменения сразу
     if player.Character then
         onCharacterAdded(player.Character)
     end
