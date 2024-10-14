@@ -1,18 +1,27 @@
 local RunService = game:GetService("RunService")
 local player = game.Players.LocalPlayer
 
+-- Уникальные имена для глобальных переменных
+_G.MyUniqueSpeedEnabled = false
+_G.MyUniqueSpeed = 16
+
 local function applyCustomAttributes(humanoid)
     if _G.MyUniqueSpeedEnabled then
         humanoid.WalkSpeed = _G.MyUniqueSpeed
-        humanoid.JumpPower = _G.MyUniqueJumpHeight
     end
 end
 
 local function onCharacterAdded(character)
     local humanoid = character:WaitForChild("Humanoid")
 
-    RunService.RenderStepped:Connect(function()
-        applyCustomAttributes(humanoid)
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        if _G.MyUniqueSpeedEnabled then
+            applyCustomAttributes(humanoid)
+        elseif connection then
+            connection:Disconnect()
+            connection = nil
+        end
     end)
 end
 
