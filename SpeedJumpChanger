@@ -3,13 +3,11 @@ local player = game.Players.LocalPlayer
 
 local connection
 
-local function updateAttributes(humanoid, originalWalkSpeed, originalJumpPower)
+local function updateAttributes(humanoid)
     if _G.MyScriptPlayerSpeedEnabled then
-        -- Применяем только если включено
         humanoid.WalkSpeed = _G.MyScriptPlayerSpeed
         humanoid.JumpPower = _G.MyScriptPlayerJumpHeight
     elseif connection then
-        -- Отключаем обновление, если скрипт неактивен
         connection:Disconnect()
         connection = nil
     end
@@ -17,11 +15,9 @@ end
 
 local function onCharacterAdded(character)
     local humanoid = character:WaitForChild("Humanoid")
-    local originalWalkSpeed = humanoid.WalkSpeed
-    local originalJumpPower = humanoid.JumpPower
 
     connection = RunService.RenderStepped:Connect(function()
-        updateAttributes(humanoid, originalWalkSpeed, originalJumpPower)
+        updateAttributes(humanoid)
     end)
 end
 
