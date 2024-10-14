@@ -1,5 +1,5 @@
 -- Интервал проверки в секундах
-local checkInterval = 3
+local checkInterval = 5
 
 -- Функция для получения имени локального игрока
 local function getLocalPlayerName()
@@ -30,15 +30,6 @@ local function parseInfo()
             end
         end
         wait(checkInterval)
-    end
-end
-
--- Функция для однократного парсинга значения
-function parseOnce()
-    local playerName = getLocalPlayerName()
-    local jgnChanceValue = getJGNChanceValue(playerName)
-    if jgnChanceValue then
-        print("Однократное значение JGNChance:", jgnChanceValue)
     end
 end
 
