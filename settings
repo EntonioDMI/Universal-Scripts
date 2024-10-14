@@ -12,3 +12,6 @@ _G.HighlightTeamCheck = false
 _G.CustomHighlightColor = Color3.fromRGB(255, 255, 255)
 _G.FillTransparency = 0.5
 _G.OutlineTransparency = 0
+_G.MyScriptPlayerSpeedEnabled = false
+_G.MyScriptPlayerSpeed = 16
+_G.MyScriptPlayerJumpHeight = 50
