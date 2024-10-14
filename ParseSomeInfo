@@ -1,0 +1,46 @@
+-- Интервал проверки в секундах
+local checkInterval = 3
+
+-- Функция для получения имени локального игрока
+local function getLocalPlayerName()
+    return game.Players.LocalPlayer.Name
+end
+
+-- Функция для получения значения свойства JGNChance
+local function getJGNChanceValue(playerName)
+    local success, value = pcall(function()
+        return game.Players[playerName].JGNChance.Value
+    end)
+    if success then
+        return value
+    else
+        warn("Не удалось получить значение JGNChance")
+        return nil
+    end
+end
+
+-- Основная функция для периодической проверки значения
+local function parseInfo()
+    while true do
+        if _G.ParseEnabled then
+            local playerName = getLocalPlayerName()
+            local jgnChanceValue = getJGNChanceValue(playerName)
+            if jgnChanceValue then
+                print("Значение JGNChance:", jgnChanceValue)
+            end
+        end
+        wait(checkInterval)
+    end
+end
+
+-- Функция для однократного парсинга значения
+function parseOnce()
+    local playerName = getLocalPlayerName()
+    local jgnChanceValue = getJGNChanceValue(playerName)
+    if jgnChanceValue then
+        print("Однократное значение JGNChance:", jgnChanceValue)
+    end
+end
+
+-- Запуск функции в отдельном потоке
+spawn(parseInfo)
