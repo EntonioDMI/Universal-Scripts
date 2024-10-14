@@ -1,37 +1,27 @@
--- Локальный скрипт для симуляции увеличения скорости игрока в Roblox
-
--- Флаг для включения/отключения модификации
-local MyScriptPlayerChangeModificatorEnabled = false
-
--- Новая скорость для симуляции
-local MyScriptPlayerSpeed = 32 -- Увеличенная скорость
-
 -- Получаем игрока
 local player = game.Players.LocalPlayer
 
 -- Функция для симуляции увеличения скорости
 local function simulateSpeedIncrease(character)
-    if MyScriptPlayerChangeModificatorEnabled then
-        -- Ждем, пока Humanoid не станет доступным
-        local humanoid = character:WaitForChild("Humanoid")
-        local rootPart = character:WaitForChild("HumanoidRootPart")
+    -- Ждем, пока Humanoid не станет доступным
+    local humanoid = character:WaitForChild("Humanoid")
+    local rootPart = character:WaitForChild("HumanoidRootPart")
 
-        -- Подключаем функцию к RenderStepped для постоянного изменения позиции
-        local connection
-        connection = game:GetService("RunService").RenderStepped:Connect(function()
-            if MyScriptPlayerChangeModificatorEnabled and humanoid and rootPart then
-                -- Вычисляем вектор движения
-                local moveDirection = humanoid.MoveDirection * (MyScriptPlayerSpeed - humanoid.WalkSpeed) * game:GetService("RunService").RenderStepped:Wait()
-                rootPart.CFrame = rootPart.CFrame + moveDirection
-            else
-                -- Отключаем подключение, если модификация выключена
-                connection:Disconnect()
-            end
-        end)
+    -- Подключаем функцию к RenderStepped для постоянного изменения позиции
+    local connection
+    connection = game:GetService("RunService").RenderStepped:Connect(function()
+        if _G.MyScriptPlayerChangeModificatorEnabled and humanoid and rootPart then
+            -- Вычисляем вектор движения
+            local moveDirection = humanoid.MoveDirection * (_G.MyScriptPlayerSpeed - humanoid.WalkSpeed) * game:GetService("RunService").RenderStepped:Wait()
+            rootPart.CFrame = rootPart.CFrame + moveDirection
+        else
+            -- Отключаем подключение, если модификация выключена
+            connection:Disconnect()
+        end
+    end)
 
-        -- Выводим сообщение в консоль
-        print("Симуляция увеличения скорости игрока до: " .. MyScriptPlayerSpeed)
-    end
+    -- Выводим сообщение в консоль
+    print("Симуляция увеличения скорости игрока до: " .. _G.MyScriptPlayerSpeed)
 end
 
 -- Подключаем функцию к событию CharacterAdded
