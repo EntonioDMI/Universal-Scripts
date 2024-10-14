@@ -9,23 +9,20 @@ local function modifyPlayerAttributes()
         local originalWalkSpeed = humanoid.WalkSpeed
         local originalJumpPower = humanoid.JumpPower
 
-        local function applyChanges()
-            while true do
-                if _G.PlayerSpeedEnabled then
-                    -- Apply custom speed and jump only if enabled
-                    humanoid.WalkSpeed = _G.PlayerSpeed
-                    humanoid.JumpPower = _G.PlayerJumpHeight
-                else
-                    -- Restore original values and exit loop
-                    humanoid.WalkSpeed = originalWalkSpeed
-                    humanoid.JumpPower = originalJumpPower
-                    break
-                end
-                RunService.Heartbeat:Wait()
+        local function applyCustomAttributes()
+            if _G.PlayerSpeedEnabled then
+                humanoid.WalkSpeed = _G.PlayerSpeed
+                humanoid.JumpPower = _G.PlayerJumpHeight
+            else
+                humanoid.WalkSpeed = originalWalkSpeed
+                humanoid.JumpPower = originalJumpPower
             end
         end
 
-        coroutine.wrap(applyChanges)()
+        -- Listen for changes to _G.PlayerSpeedEnabled
+        RunService.Heartbeat:Connect(function()
+            applyCustomAttributes()
+        end)
     end
 
     player.CharacterAdded:Connect(onCharacterAdded)
