@@ -1,44 +1,36 @@
 -- Получаем игрока
 local player = game.Players.LocalPlayer
 
--- Функция для симуляции увеличения скорости
-local function simulateSpeedIncrease(character)
+-- Функция для симуляции увеличения скорости и высоты прыжка
+local function simulatePlayerModifications(character)
     -- Ждем, пока Humanoid не станет доступным
     local humanoid = character:WaitForChild("Humanoid")
     local rootPart = character:WaitForChild("HumanoidRootPart")
 
-    -- Подключаем функцию к RenderStepped для постоянного изменения позиции
+    -- Подключаем функцию к RenderStepped для постоянного изменения параметров
     local connection
     connection = game:GetService("RunService").RenderStepped:Connect(function()
         if _G.MyScriptPlayerChangeModificatorEnabled and humanoid and rootPart then
-            -- Вычисляем вектор движения
+            -- Симулируем увеличение скорости
             local moveDirection = humanoid.MoveDirection * (_G.MyScriptPlayerSpeed - humanoid.WalkSpeed) * game:GetService("RunService").RenderStepped:Wait()
             rootPart.CFrame = rootPart.CFrame + moveDirection
-        end
-    end)
 
-    -- Подключаем функцию для отслеживания изменений в реальном времени
-    game:GetService("RunService").Stepped:Connect(function()
-        if not _G.MyScriptPlayerChangeModificatorEnabled and connection then
-            -- Отключаем подключение, если модификация выключена
-            connection:Disconnect()
-            connection = nil
-            print("Модификация отключена")
-        elseif _G.MyScriptPlayerChangeModificatorEnabled and not connection then
-            -- Переподключаем, если модификация снова включена
-            connection = game:GetService("RunService").RenderStepped:Connect(function()
-                if _G.MyScriptPlayerChangeModificatorEnabled and humanoid and rootPart then
-                    local moveDirection = humanoid.MoveDirection * (_G.MyScriptPlayerSpeed - humanoid.WalkSpeed) * game:GetService("RunService").RenderStepped:Wait()
-                    rootPart.CFrame = rootPart.CFrame + moveDirection
-                end
-            end)
-            print("Модификация включена")
+            -- Симулируем увеличение высоты прыжка
+            if humanoid:GetState() == Enum.HumanoidStateType.Jumping then
+                rootPart.Velocity = Vector3.new(rootPart.Velocity.X, _G.MyScriptPlayerJumpHeight, rootPart.Velocity.Z)
+            end
         end
     end)
 
     -- Выводим сообщение в консоль
-    print("Симуляция увеличения скорости игрока до: " .. _G.MyScriptPlayerSpeed)
+    print("Симуляция увеличения скорости до: " .. _G.MyScriptPlayerSpeed)
+    print("Симуляция увеличения высоты прыжка до: " .. _G.MyScriptPlayerJumpHeight)
 end
 
 -- Подключаем функцию к событию CharacterAdded
-player.CharacterAdded:Connect(simulateSpeedIncrease)
+player.CharacterAdded:Connect(simulatePlayerModifications)
+
+-- Если персонаж уже загружен, применяем изменения сразу
+if player.Character then
+    simulatePlayerModifications(player.Character)
+end
