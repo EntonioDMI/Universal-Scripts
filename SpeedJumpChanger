@@ -5,19 +5,24 @@ local function modifyPlayerAttributes()
     local humanoid
     local originalWalkSpeed
     local originalJumpPower
-    local connection
 
-    local function applyCustomAttributes()
-        if humanoid and _G.MyScriptPlayerSpeedEnabled then
-            humanoid.WalkSpeed = _G.MyScriptPlayerSpeed
-            humanoid.JumpPower = _G.MyScriptPlayerJumpHeight
-        end
-    end
-
-    local function restoreOriginalAttributes()
+    local function updateAttributes()
         if humanoid then
-            humanoid.WalkSpeed = originalWalkSpeed
-            humanoid.JumpPower = originalJumpPower
+            if _G.MyScriptPlayerSpeedEnabled then
+                if humanoid.WalkSpeed ~= _G.MyScriptPlayerSpeed then
+                    humanoid.WalkSpeed = _G.MyScriptPlayerSpeed
+                end
+                if humanoid.JumpPower ~= _G.MyScriptPlayerJumpHeight then
+                    humanoid.JumpPower = _G.MyScriptPlayerJumpHeight
+                end
+            else
+                if humanoid.WalkSpeed ~= originalWalkSpeed then
+                    humanoid.WalkSpeed = originalWalkSpeed
+                end
+                if humanoid.JumpPower ~= originalJumpPower then
+                    humanoid.JumpPower = originalJumpPower
+                end
+            end
         end
     end
 
@@ -26,18 +31,8 @@ local function modifyPlayerAttributes()
         originalWalkSpeed = humanoid.WalkSpeed
         originalJumpPower = humanoid.JumpPower
 
-        if connection then
-            connection:Disconnect()
-        end
-
-        connection = RunService.Heartbeat:Connect(function()
-            if _G.MyScriptPlayerSpeedEnabled then
-                applyCustomAttributes()
-            else
-                restoreOriginalAttributes()
-                connection:Disconnect()  -- Останавливаем проверку после восстановления
-            end
-        end)
+        -- Следим за изменениями переменных и обновляем атрибуты
+        RunService.Heartbeat:Connect(updateAttributes)
     end
 
     player.CharacterAdded:Connect(onCharacterAdded)
