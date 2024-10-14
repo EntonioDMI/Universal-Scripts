@@ -1,1 +1,36 @@
+local player = game.Players.LocalPlayer
 
+local function modifyPlayerAttributes()
+    local humanoid
+    local originalWalkSpeed
+    local originalJumpPower
+
+    local function updateAttributes()
+        if humanoid then
+            if _G.MyScriptPlayerSpeedEnabled then
+                humanoid.WalkSpeed = _G.MyScriptPlayerSpeed
+                humanoid.JumpPower = _G.MyScriptPlayerJumpHeight
+            else
+                humanoid.WalkSpeed = originalWalkSpeed
+                humanoid.JumpPower = originalJumpPower
+            end
+        end
+    end
+
+    local function onCharacterAdded(character)
+        humanoid = character:WaitForChild("Humanoid")
+        originalWalkSpeed = humanoid.WalkSpeed
+        originalJumpPower = humanoid.JumpPower
+
+        -- Используем RenderStepped для более частого обновления
+        game:GetService("RunService").RenderStepped:Connect(updateAttributes)
+    end
+
+    player.CharacterAdded:Connect(onCharacterAdded)
+
+    if player.Character then
+        onCharacterAdded(player.Character)
+    end
+end
+
+modifyPlayerAttributes()
