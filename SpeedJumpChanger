@@ -8,14 +8,14 @@ local function modifyPlayerAttributes()
     local connection
 
     local function applyCustomAttributes()
-        if humanoid then
+        if humanoid and _G.PlayerSpeedEnabled then
             humanoid.WalkSpeed = _G.PlayerSpeed
             humanoid.JumpPower = _G.PlayerJumpHeight
         end
     end
 
     local function restoreOriginalAttributes()
-        if humanoid then
+        if humanoid and not _G.PlayerSpeedEnabled then
             humanoid.WalkSpeed = originalWalkSpeed
             humanoid.JumpPower = originalJumpPower
         end
