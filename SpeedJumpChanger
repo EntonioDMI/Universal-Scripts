@@ -14,9 +14,25 @@ local function simulateSpeedIncrease(character)
             -- Вычисляем вектор движения
             local moveDirection = humanoid.MoveDirection * (_G.MyScriptPlayerSpeed - humanoid.WalkSpeed) * game:GetService("RunService").RenderStepped:Wait()
             rootPart.CFrame = rootPart.CFrame + moveDirection
-        else
+        end
+    end)
+
+    -- Подключаем функцию для отслеживания изменений в реальном времени
+    game:GetService("RunService").RenderStepped:Connect(function()
+        if not _G.MyScriptPlayerChangeModificatorEnabled and connection then
             -- Отключаем подключение, если модификация выключена
             connection:Disconnect()
+            connection = nil
+            print("Модификация отключена")
+        elseif _G.MyScriptPlayerChangeModificatorEnabled and not connection then
+            -- Переподключаем, если модификация снова включена
+            connection = game:GetService("RunService").RenderStepped:Connect(function()
+                if _G.MyScriptPlayerChangeModificatorEnabled and humanoid and rootPart then
+                    local moveDirection = humanoid.MoveDirection * (_G.MyScriptPlayerSpeed - humanoid.WalkSpeed) * game:GetService("RunService").RenderStepped:Wait()
+                    rootPart.CFrame = rootPart.CFrame + moveDirection
+                end
+            end)
+            print("Модификация включена")
         end
     end)
 
