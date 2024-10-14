@@ -22,16 +22,13 @@ local function modifyPlayerAttributes()
         originalWalkSpeed = humanoid.WalkSpeed
         originalJumpPower = humanoid.JumpPower
 
-        -- Следим за изменениями переменных и обновляем атрибуты
-        while true do
+        while wait(0.1) do
             updateAttributes()
-            wait(0.1) -- Периодически проверяем состояние
         end
     end
 
     player.CharacterAdded:Connect(onCharacterAdded)
 
-    -- Если персонаж уже существует, применяем изменения сразу
     if player.Character then
         onCharacterAdded(player.Character)
     end
