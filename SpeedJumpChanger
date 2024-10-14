@@ -5,19 +5,16 @@ local function modifyPlayerAttributes()
     local humanoid
     local originalWalkSpeed
     local originalJumpPower
-    local connection
 
-    local function applyCustomAttributes()
+    local function updateAttributes()
         if humanoid then
-            humanoid.WalkSpeed = _G.MyScriptPlayerSpeed
-            humanoid.JumpPower = _G.MyScriptPlayerJumpHeight
-        end
-    end
-
-    local function restoreOriginalAttributes()
-        if humanoid then
-            humanoid.WalkSpeed = originalWalkSpeed
-            humanoid.JumpPower = originalJumpPower
+            if _G.MyScriptPlayerSpeedEnabled then
+                humanoid.WalkSpeed = _G.MyScriptPlayerSpeed
+                humanoid.JumpPower = _G.MyScriptPlayerJumpHeight
+            else
+                humanoid.WalkSpeed = originalWalkSpeed
+                humanoid.JumpPower = originalJumpPower
+            end
         end
     end
 
@@ -26,17 +23,10 @@ local function modifyPlayerAttributes()
         originalWalkSpeed = humanoid.WalkSpeed
         originalJumpPower = humanoid.JumpPower
 
-        if connection then
-            connection:Disconnect()
-        end
+        updateAttributes() -- Применяем изменения при появлении персонажа
 
-        connection = RunService.Heartbeat:Connect(function()
-            if _G.MyScriptPlayerSpeedEnabled then
-                applyCustomAttributes()
-            else
-                restoreOriginalAttributes()
-            end
-        end)
+        -- Следим за изменениями переменных и обновляем атрибуты
+        RunService.Heartbeat:Connect(updateAttributes)
     end
 
     player.CharacterAdded:Connect(onCharacterAdded)
