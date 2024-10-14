@@ -2,32 +2,43 @@ local RunService = game:GetService("RunService")
 local player = game.Players.LocalPlayer
 
 local function modifyPlayerAttributes()
-    local function onCharacterAdded(character)
-        local humanoid = character:WaitForChild("Humanoid")
-        local rootPart = character:WaitForChild("HumanoidRootPart")
+    local humanoid
+    local originalWalkSpeed
+    local originalJumpPower
 
-        local originalWalkSpeed = humanoid.WalkSpeed
-        local originalJumpPower = humanoid.JumpPower
-
-        local function applyCustomAttributes()
-            if _G.PlayerSpeedEnabled then
-                humanoid.WalkSpeed = _G.PlayerSpeed
-                humanoid.JumpPower = _G.PlayerJumpHeight
-            else
-                humanoid.WalkSpeed = originalWalkSpeed
-                humanoid.JumpPower = originalJumpPower
-            end
+    local function applyCustomAttributes()
+        if _G.PlayerSpeedEnabled and humanoid then
+            humanoid.WalkSpeed = _G.PlayerSpeed
+            humanoid.JumpPower = _G.PlayerJumpHeight
+        elseif humanoid then
+            humanoid.WalkSpeed = originalWalkSpeed
+            humanoid.JumpPower = originalJumpPower
         end
+    end
 
-        -- Listen for changes to _G.PlayerSpeedEnabled
-        RunService.Heartbeat:Connect(function()
-            applyCustomAttributes()
+    local function onCharacterAdded(character)
+        humanoid = character:WaitForChild("Humanoid")
+        originalWalkSpeed = humanoid.WalkSpeed
+        originalJumpPower = humanoid.JumpPower
+
+        humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+            if not _G.PlayerSpeedEnabled then
+                originalWalkSpeed = humanoid.WalkSpeed
+            end
         end)
+
+        humanoid:GetPropertyChangedSignal("JumpPower"):Connect(function()
+            if not _G.PlayerSpeedEnabled then
+                originalJumpPower = humanoid.JumpPower
+            end
+        end)
+
+        RunService.Heartbeat:Connect(applyCustomAttributes)
     end
 
     player.CharacterAdded:Connect(onCharacterAdded)
 
-    -- If the character already exists, apply changes immediately
+    -- Если персонаж уже существует, применяем изменения сразу
     if player.Character then
         onCharacterAdded(player.Character)
     end
