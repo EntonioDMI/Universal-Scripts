@@ -1,6 +1,3 @@
--- Загружаем функционал
-loadstring(game:HttpGet("https://raw.githubusercontent.com/EntonioDMI/EntonioDevelopment/refs/heads/main/ItemViewer"))()
-
 _G.PlayersService = game:GetService("Players")
 _G.LocalPlayerInstance = _G.PlayersService.LocalPlayer
 
