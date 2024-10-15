@@ -15,3 +15,4 @@ _G.OutlineTransparency = 0
 _G.MyScriptPlayerSpeedEnabled = false
 _G.MyScriptPlayerSpeed = 16
 _G.MyScriptPlayerJumpHeight = 50
+ _G.EnabledIAIt = false
