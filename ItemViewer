@@ -3,7 +3,7 @@ _G.LocalPlayerInstance = _G.PlayersService.LocalPlayer
 
 -- Глобальные переменные для настройки
 _G.InventoryUIConfig = {
-    SizeMultiplier = 1,  -- Множитель размера панели
+    SizeMultiplier = 1,  -- Множитель размера элементов
     StudsOffset = Vector3.new(0, 3, 0),  -- Смещение по высоте
     TextSize = 35  -- Размер текста
 }
@@ -24,7 +24,7 @@ function _G.CreateOrActivateInventoryUI(player)
         end
 
         local billboardGui = Instance.new("BillboardGui")
-        billboardGui.Size = UDim2.new(0, 300, 0, 50)  -- Стандартный размер
+        billboardGui.Size = UDim2.new(0, 300, 0, 50)  -- Фиксированный размер
         billboardGui.StudsOffset = _G.InventoryUIConfig.StudsOffset
         billboardGui.AlwaysOnTop = true
         billboardGui.Parent = head
@@ -91,6 +91,7 @@ function _G.CreateOrActivateInventoryUI(player)
             while billboardGui.Parent do
                 billboardGui.StudsOffset = _G.InventoryUIConfig.StudsOffset
                 billboardGui.Enabled = _G.EnabledIAIt
+                updateItems()  -- Обновляем элементы для применения изменений
                 wait(0.1)
             end
         end
