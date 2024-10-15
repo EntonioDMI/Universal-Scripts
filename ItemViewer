@@ -37,12 +37,7 @@ function _G.CreateOrActivateInventoryUI(player)
         inventoryFrame.BackgroundTransparency = 1
 
         local function updateItems()
-            if not _G.EnabledIAIt then
-                billboardGui.Enabled = false
-                return
-            else
-                billboardGui.Enabled = true
-            end
+            billboardGui.Enabled = _G.EnabledIAIt
 
             inventoryFrame:ClearAllChildren()
 
@@ -99,6 +94,7 @@ function _G.CreateOrActivateInventoryUI(player)
             while billboardGui.Parent do
                 billboardGui.Size = _G.InventoryUIConfig.Size
                 billboardGui.StudsOffset = _G.InventoryUIConfig.StudsOffset
+                billboardGui.Enabled = _G.EnabledIAIt
                 wait(0.1)
             end
         end
