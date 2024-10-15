@@ -1,0 +1,142 @@
+_G.PlayersService = game:GetService("Players")
+_G.LocalPlayerInstance = _G.PlayersService.LocalPlayer
+
+-- Глобальные переменные для настройки
+_G.InventoryUIConfig = {
+    Size = UDim2.new(0, 200, 0, 35),  -- Размер панели
+    StudsOffset = Vector3.new(0, 3, 0),  -- Смещение по высоте
+    TextSize = UDim2.new(0, 35, 0, 35)  -- Размер текста
+}
+
+_G.EnabledIAIt = true
+
+function _G.CreateOrActivateInventoryUI(player)
+    local function onCharacterAdded(character)
+        character:WaitForChild("Head", 10)
+
+        local head = character:FindFirstChild("Head")
+        if not head then return end
+
+        local existingGui = head:FindFirstChildOfClass("BillboardGui")
+        if existingGui then
+            existingGui.Enabled = _G.EnabledIAIt
+            return
+        end
+
+        local billboardGui = Instance.new("BillboardGui")
+        billboardGui.Size = _G.InventoryUIConfig.Size
+        billboardGui.StudsOffset = _G.InventoryUIConfig.StudsOffset
+        billboardGui.AlwaysOnTop = true
+        billboardGui.Parent = head
+
+        local inventoryFrame = Instance.new("Frame", billboardGui)
+        inventoryFrame.Size = UDim2.new(1, 0, 1, 0)
+        inventoryFrame.BackgroundTransparency = 1
+
+        local function updateItems()
+            if not _G.EnabledIAIt then
+                billboardGui.Enabled = false
+                return
+            else
+                billboardGui.Enabled = true
+            end
+
+            inventoryFrame:ClearAllChildren()
+
+            local items = {}
+
+            for _, item in pairs(player.Backpack:GetChildren()) do
+                table.insert(items, item.Name)
+            end
+
+            for _, item in pairs(character:GetChildren()) do
+                if item:IsA("Tool") then
+                    table.insert(items, item.Name)
+                end
+            end
+
+            if #items == 0 then
+                local emptyLabel = Instance.new("TextLabel", inventoryFrame)
+                emptyLabel.Text = "No Items"
+                emptyLabel.Size = UDim2.new(0, 100, 0, 35)
+                emptyLabel.Position = UDim2.new(0.5, -50, 0, 0)
+                emptyLabel.TextColor3 = Color3.new(1, 1, 1)
+                emptyLabel.BackgroundTransparency = 0.5
+                emptyLabel.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+                emptyLabel.TextScaled = true
+                emptyLabel.Font = Enum.Font.SourceSans
+            else
+                local totalWidth = #items * _G.InventoryUIConfig.TextSize.X.Offset + (#items - 1) * 5
+                local xOffset = -totalWidth / 2
+
+                for _, itemName in ipairs(items) do
+                    local itemLabel = Instance.new("TextLabel", inventoryFrame)
+                    itemLabel.Text = itemName
+                    itemLabel.Size = _G.InventoryUIConfig.TextSize
+                    itemLabel.Position = UDim2.new(0, xOffset + 100, 0, 0)
+                    itemLabel.TextColor3 = Color3.new(1, 1, 1)
+                    itemLabel.BackgroundTransparency = 0.5
+                    itemLabel.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+                    itemLabel.TextScaled = true
+                    itemLabel.Font = Enum.Font.SourceSans
+
+                    xOffset = xOffset + _G.InventoryUIConfig.TextSize.X.Offset + 5
+                end
+            end
+        end
+
+        player.Backpack.ChildAdded:Connect(updateItems)
+        player.Backpack.ChildRemoved:Connect(updateItems)
+        character.ChildAdded:Connect(updateItems)
+        character.ChildRemoved:Connect(updateItems)
+
+        updateItems()
+
+        local function updateConfig()
+            while billboardGui.Parent do
+                billboardGui.Size = _G.InventoryUIConfig.Size
+                billboardGui.StudsOffset = _G.InventoryUIConfig.StudsOffset
+                wait(0.1)
+            end
+        end
+
+        spawn(updateConfig)
+    end
+
+    player.CharacterAdded:Connect(onCharacterAdded)
+
+    if player.Character then
+        onCharacterAdded(player.Character)
+    end
+end
+
+for _, playerInstance in pairs(_G.PlayersService:GetPlayers()) do
+    if playerInstance ~= _G.LocalPlayerInstance then
+        _G.CreateOrActivateInventoryUI(playerInstance)
+    end
+end
+
+_G.PlayersService.PlayerAdded:Connect(function(playerInstance)
+    if playerInstance ~= _G.LocalPlayerInstance then
+        _G.CreateOrActivateInventoryUI(playerInstance)
+    end
+end)
+
+function _G.MonitorGlobalVariable()
+    while true do
+        for _, playerInstance in pairs(_G.PlayersService:GetPlayers()) do
+            if playerInstance ~= _G.LocalPlayerInstance and playerInstance.Character then
+                local head = playerInstance.Character:FindFirstChild("Head")
+                if head then
+                    local billboardGui = head:FindFirstChildOfClass("BillboardGui")
+                    if billboardGui then
+                        billboardGui.Enabled = _G.EnabledIAIt
+                    end
+                end
+            end
+        end
+        wait(0.5)
+    end
+end
+
+spawn(_G.MonitorGlobalVariable)
