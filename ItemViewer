@@ -3,9 +3,9 @@ _G.LocalPlayerInstance = _G.PlayersService.LocalPlayer
 
 -- Глобальные переменные для настройки
 _G.InventoryUIConfig = {
-    Size = UDim2.new(0, 200, 0, 35),  -- Размер панели
+    SizeMultiplier = 1,  -- Множитель размера панели
     StudsOffset = Vector3.new(0, 3, 0),  -- Смещение по высоте
-    TextSize = UDim2.new(0, 35, 0, 35)  -- Размер текста
+    TextSize = 35  -- Размер текста
 }
 
 _G.EnabledIAIt = true
@@ -24,7 +24,7 @@ function _G.CreateOrActivateInventoryUI(player)
         end
 
         local billboardGui = Instance.new("BillboardGui")
-        billboardGui.Size = _G.InventoryUIConfig.Size
+        billboardGui.Size = UDim2.new(0, 300, 0, 50)  -- Стандартный размер
         billboardGui.StudsOffset = _G.InventoryUIConfig.StudsOffset
         billboardGui.AlwaysOnTop = true
         billboardGui.Parent = head
@@ -53,29 +53,29 @@ function _G.CreateOrActivateInventoryUI(player)
             if #items == 0 then
                 local emptyLabel = Instance.new("TextLabel", inventoryFrame)
                 emptyLabel.Text = "No Items"
-                emptyLabel.Size = UDim2.new(0, 100, 0, 35)
-                emptyLabel.Position = UDim2.new(0.5, -50, 0, 0)
+                emptyLabel.Size = UDim2.new(0, 100 * _G.InventoryUIConfig.SizeMultiplier, 0, 35 * _G.InventoryUIConfig.SizeMultiplier)
+                emptyLabel.Position = UDim2.new(0.5, -50 * _G.InventoryUIConfig.SizeMultiplier, 0, 0)
                 emptyLabel.TextColor3 = Color3.new(1, 1, 1)
                 emptyLabel.BackgroundTransparency = 0.5
                 emptyLabel.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
                 emptyLabel.TextScaled = true
                 emptyLabel.Font = Enum.Font.SourceSans
             else
-                local totalWidth = #items * _G.InventoryUIConfig.TextSize.X.Offset + (#items - 1) * 5
+                local totalWidth = #items * _G.InventoryUIConfig.TextSize * _G.InventoryUIConfig.SizeMultiplier + (#items - 1) * 5
                 local xOffset = -totalWidth / 2
 
                 for _, itemName in ipairs(items) do
                     local itemLabel = Instance.new("TextLabel", inventoryFrame)
                     itemLabel.Text = itemName
-                    itemLabel.Size = _G.InventoryUIConfig.TextSize
-                    itemLabel.Position = UDim2.new(0, xOffset + 100, 0, 0)
+                    itemLabel.Size = UDim2.new(0, _G.InventoryUIConfig.TextSize * _G.InventoryUIConfig.SizeMultiplier, 0, _G.InventoryUIConfig.TextSize * _G.InventoryUIConfig.SizeMultiplier)
+                    itemLabel.Position = UDim2.new(0, xOffset + 150, 0, 0)
                     itemLabel.TextColor3 = Color3.new(1, 1, 1)
                     itemLabel.BackgroundTransparency = 0.5
                     itemLabel.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
                     itemLabel.TextScaled = true
                     itemLabel.Font = Enum.Font.SourceSans
 
-                    xOffset = xOffset + _G.InventoryUIConfig.TextSize.X.Offset + 5
+                    xOffset = xOffset + _G.InventoryUIConfig.TextSize * _G.InventoryUIConfig.SizeMultiplier + 5
                 end
             end
         end
@@ -89,7 +89,6 @@ function _G.CreateOrActivateInventoryUI(player)
 
         local function updateConfig()
             while billboardGui.Parent do
-                billboardGui.Size = _G.InventoryUIConfig.Size
                 billboardGui.StudsOffset = _G.InventoryUIConfig.StudsOffset
                 billboardGui.Enabled = _G.EnabledIAIt
                 wait(0.1)
