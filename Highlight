@@ -18,9 +18,13 @@ local highlightCache = {}
 
 local function updateHighlight(highlight, plr)
     local highlightColor = _G.AutoTeamColor and (plr.Team and plr.Team.TeamColor.Color or Color3.fromRGB(255, 255, 255)) or _G.CustomHighlightColor
-    highlight.FillColor = highlightColor
-    highlight.FillTransparency = _G.FillTransparency
-    highlight.OutlineTransparency = _G.OutlineTransparency
+    if highlight.FillColor ~= highlightColor or
+       highlight.FillTransparency ~= _G.FillTransparency or
+       highlight.OutlineTransparency ~= _G.OutlineTransparency then
+        highlight.FillColor = highlightColor
+        highlight.FillTransparency = _G.FillTransparency
+        highlight.OutlineTransparency = _G.OutlineTransparency
+    end
 end
 
 local function getOrCreateHighlight(plr)
