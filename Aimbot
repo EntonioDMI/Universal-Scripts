@@ -112,7 +112,7 @@ end)
 
 RunService.RenderStepped:Connect(function()
     -- Центрирование круга FOV относительно центра мыши
-    FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y)
+    FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y + 36) -- Опустим круг ниже
     UpdateFOVCircle()
 
     if _G.Aiming and _G.Aimbot then
@@ -135,10 +135,9 @@ RunService.RenderStepped:Connect(function()
                 local textLabel = Instance.new("TextLabel", billboard)
                 textLabel.Size = UDim2.new(1, 0, 1, 0)
                 textLabel.BackgroundTransparency = 1
-                    textLabel.Text = player.Name
-                    textLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-                    textLabel.TextScaled = true
-                end
+                textLabel.Text = player.Name
+                textLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+                textLabel.TextScaled = true
             end
         end
     end
