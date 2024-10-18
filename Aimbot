@@ -101,8 +101,6 @@ UserInputService.InputBegan:Connect(function(input)
                         else
                             _G.IgnorePlayers[player.Name] = true
                         end
-                        -- Update friends list display
-                        updateFriendsListDisplay()
                         break
                     end
                 end
