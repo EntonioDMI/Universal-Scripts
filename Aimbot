@@ -1,4 +1,7 @@
--- Локальные переменные
+--[[
+    Aimbot and Friend System
+--]]
+
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
@@ -8,7 +11,7 @@ local Mouse = LocalPlayer:GetMouse()
 
 local Friends = {}
 
--- Инициализация глобальных переменных
+-- Глобальные переменные для настроек
 _G.Aimbot = _G.Aimbot or false
 _G.Aimbot_FOV_Radius = _G.Aimbot_FOV_Radius or 200
 _G.Aimbot_FOV_Color = _G.Aimbot_FOV_Color or Color3.fromRGB(255, 255, 255)
@@ -35,7 +38,7 @@ local function GetClosestPlayer()
     local closestPlayer = nil
     local shortestDistance = _G.Aimbot_FOV_Radius
 
-    for _, player in pairs(Players:GetPlayers()) do
+    for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(_G.Aimbot_AimPart) then
             if _G.Aimbot_TeamCheck and player.Team == LocalPlayer.Team then
                 continue
