@@ -35,6 +35,9 @@ local function UpdateFOVCircle()
     FOVCircle.Visible = _G.Aimbot and _G.Aimbot_Draw_FOV
 end
 
+-- Обновляем круг FOV сразу после установки начальных значений
+UpdateFOVCircle()
+
 local function IsVisible(targetPosition)
     local ray = Ray.new(Camera.CFrame.Position, (targetPosition - Camera.CFrame.Position).unit * 500)
     local hit, _ = workspace:FindPartOnRay(ray, LocalPlayer.Character, false, true)
