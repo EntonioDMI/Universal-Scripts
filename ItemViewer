@@ -8,7 +8,7 @@ _G.InventoryUIConfig = {
     TextSize = 35  -- Размер текста
 }
 
-_G.EnabledIAIt = true
+_G.EnabledIAIt = false
 
 function _G.CreateOrActivateInventoryUI(player)
     local function onCharacterAdded(character)
