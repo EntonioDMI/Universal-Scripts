@@ -1,7 +1,3 @@
---[[
-    Aimbot and Friend System
---]]
-
 -- Локальные переменные
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
