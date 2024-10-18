@@ -1,76 +1,13 @@
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-local Window = Fluent:CreateWindow({
-    Title = "Fluent Menu",
-    SubTitle = "by dawid",
-    TabWidth = 160,
-    Size = UDim2.fromOffset(580, 460),
-    Acrylic = true,
-    Theme = "Dark",
-    MinimizeKey = Enum.KeyCode.LeftControl
-})
+--[[
+    Aimbot and Friend System
+    ___  _  _ ___ _  _ ____ ___  _ 
+   / _ \| || | _ \ || |__ / _ \| |
+   | (_) | __ |  _/ __ | || (_) | |
+   \___/|_||_|_| |_||_|_| \___/|_|
+                                  
+--]]
 
--- Инициализация глобальных переменных
-_G.Aimbot = false
-_G.Aimbot_FOV_Radius = 200
-_G.Aimbot_FOV_Color = Color3.fromRGB(255, 255, 255)
-_G.ToggleFriendMode = false
-_G.Aimbot_AimPart = "Head"
-_G.Aimbot_TeamCheck = false
-_G.Aimbot_Draw_FOV = true
-_G.Aimbot_visiblecheck = false
-_G.Aimbot_Onscreen = true
-_G.Aiming = false
-
-local Tabs = {
-    Main = Window:AddTab({ Title = "Main", Icon = "" }),
-    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
-}
-
-local MainSection = Tabs.Main:AddSection("Aimbot Settings")
-local FriendSection = Tabs.Main:AddSection("Friend System")
-
-MainSection:AddToggle("AimbotToggle", {
-    Title = "Enable Aimbot",
-    Description = "Toggle aimbot functionality",
-    Default = false,
-    Callback = function(state)
-        _G.Aimbot = state
-    end
-})
-
-MainSection:AddSlider("FOVSlider", {
-    Title = "Aimbot FOV",
-    Description = "Set the field of view for aimbot",
-    Default = 200,
-    Min = 50,
-    Max = 500,
-    Rounding = 1,
-    Callback = function(value)
-        _G.Aimbot_FOV_Radius = value
-    end
-})
-
-MainSection:AddColorpicker("FOVColorpicker", {
-    Title = "FOV Color",
-    Description = "Select color for FOV circle",
-    Default = Color3.fromRGB(255, 255, 255),
-    Callback = function(color)
-        _G.Aimbot_FOV_Color = color
-    end
-})
-
-FriendSection:AddToggle("FriendModeToggle", {
-    Title = "Toggle Friend Mode",
-    Description = "Enable or disable friend mode",
-    Default = false,
-    Callback = function(state)
-        _G.ToggleFriendMode = state
-    end
-})
-
-Window:SelectTab(1)
-
--- Функционал аимбота и системы друзей
+-- Локальные переменные
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
@@ -132,10 +69,28 @@ UserInputService.InputBegan:Connect(function(input)
             local player = Players:FindFirstChild(target.Parent.Name)
             if Friends[player.Name] then
                 Friends[player.Name] = nil
-                player.Character.Head.BillboardGui.TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                if player.Character and player.Character:FindFirstChild("Head") then
+                    local head = player.Character.Head
+                    if head:FindFirstChild("BillboardGui") then
+                        head.BillboardGui:Destroy()
+                    end
+                end
             else
                 Friends[player.Name] = true
-                player.Character.Head.BillboardGui.TextLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+                if player.Character and player.Character:FindFirstChild("Head") then
+                    local head = player.Character.Head
+                    local billboard = Instance.new("BillboardGui", head)
+                    billboard.Size = UDim2.new(0, 100, 0, 100)
+                    billboard.StudsOffset = Vector3.new(0, 2, 0)
+                    billboard.AlwaysOnTop = true
+
+                    local textLabel = Instance.new("TextLabel", billboard)
+                    textLabel.Size = UDim2.new(1, 0, 1, 0)
+                    textLabel.BackgroundTransparency = 1
+                    textLabel.Text = player.Name
+                    textLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+                    textLabel.TextScaled = true
+                end
             end
         end
     end
@@ -148,7 +103,8 @@ UserInputService.InputEnded:Connect(function(input)
 end)
 
 RunService.RenderStepped:Connect(function()
-    FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y)
+    -- Обновление позиции круга FOV
+    FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y + 36) -- Смещение круга ниже курсора
     FOVCircle.Radius = _G.Aimbot_FOV_Radius
     FOVCircle.Color = _G.Aimbot_FOV_Color
     FOVCircle.Visible = _G.Aimbot_Draw_FOV
@@ -164,22 +120,18 @@ RunService.RenderStepped:Connect(function()
         local player = Players:FindFirstChild(playerName)
         if player and player.Character then
             local head = player.Character:FindFirstChild("Head")
-            if head then
-                if not head:FindFirstChild("BillboardGui") then
-                    local billboard = Instance.new("BillboardGui", head)
-                    billboard.Size = UDim2.new(0, 100, 0, 100)
-                    billboard.StudsOffset = Vector3.new(0, 2, 0)
-                    billboard.AlwaysOnTop = true
+            if head and not head:FindFirstChild("BillboardGui") then
+                local billboard = Instance.new("BillboardGui", head)
+                billboard.Size = UDim2.new(0, 100, 0, 100)
+                billboard.StudsOffset = Vector3.new(0, 2, 0)
+                billboard.AlwaysOnTop = true
 
-                    local textLabel = Instance.new("TextLabel", billboard)
-                    textLabel.Size = UDim2.new(1, 0, 1, 0)
-                    textLabel.BackgroundTransparency = 1
-                    textLabel.Text = player.Name
-                    textLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-                    textLabel.TextScaled = true
-                else
-                    head.BillboardGui.Enabled = true
-                end
+                local textLabel = Instance.new("TextLabel", billboard)
+                textLabel.Size = UDim2.new(1, 0, 1, 0)
+                textLabel.BackgroundTransparency = 1
+                textLabel.Text = player.Name
+                textLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+                textLabel.TextScaled = true
             end
         end
     end
