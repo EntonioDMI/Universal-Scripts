@@ -122,12 +122,13 @@ RunService.RenderStepped:Connect(function()
             local targetPosition = closestPlayer.Character[_G.Aimbot_AimPart].Position
             
             -- Проверка значения плавности
-            local smoothness = math.clamp(_G.Aimbot_Smoothness, 0.01, 0.99)
+            local smoothness = math.clamp(_G.Aimbot_Smoothness, 0.01, 1)
 
             -- Интерполяция между текущей и целевой CFrame
-            local currentCFrame = Camera.CFrame
-            local targetCFrame = CFrame.new(currentCFrame.Position, targetPosition)
-            local newCFrame = currentCFrame:Lerp(targetCFrame, smoothness)
+            local direction = (targetPosition - Camera.CFrame.Position).unit
+            local currentLookVector = Camera.CFrame.LookVector
+            local newLookVector = currentLookVector:Lerp(direction, smoothness)
+            local newCFrame = CFrame.new(Camera.CFrame.Position, Camera.CFrame.Position + newLookVector)
             Camera.CFrame = newCFrame
         end
     end
