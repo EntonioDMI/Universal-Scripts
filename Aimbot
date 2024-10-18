@@ -121,7 +121,11 @@ RunService.RenderStepped:Connect(function()
         local closestPlayer = GetClosestPlayer()
         if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild(_G.Aimbot_AimPart) then
             local targetPosition = closestPlayer.Character[_G.Aimbot_AimPart].Position
-            local tweenInfo = TweenInfo.new(_G.Aimbot_Smoothness, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+            
+            -- Проверка значения плавности
+            local smoothness = math.clamp(_G.Aimbot_Smoothness, 0.01, 0.99) -- Устанавливаем границы от 0.01 до 0.99
+
+            local tweenInfo = TweenInfo.new(smoothness, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
             local tween = TweenService:Create(Camera, tweenInfo, {CFrame = CFrame.new(Camera.CFrame.Position, targetPosition)})
             tween:Play()
         end
