@@ -3,6 +3,13 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local lp = Players.LocalPlayer
 
+_G.HighlightEnabled = false
+_G.AutoTeamColor = false
+_G.HighlightTeamCheck = false
+_G.CustomHighlightColor = Color3.fromRGB(255, 255, 255)
+_G.FillTransparency = 0.5
+_G.OutlineTransparency = 0
+
 local Storage = Instance.new("Folder")
 Storage.Parent = CoreGui
 Storage.Name = "Highlight_Storage"
