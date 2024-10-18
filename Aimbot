@@ -8,7 +8,6 @@ local Camera = workspace.CurrentCamera
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
-local Mouse = LocalPlayer:GetMouse()
 
 local Friends = {}
 
@@ -25,7 +24,7 @@ _G.Aimbot_Onscreen = _G.Aimbot_Onscreen or true
 _G.Aiming = _G.Aiming or false
 
 local FOVCircle = Drawing.new("Circle")
-FOVCircle.Thickness = 1
+FOVCircle.Thickness = 2
 FOVCircle.Filled = false
 FOVCircle.Transparency = 1
 
@@ -55,7 +54,7 @@ local function GetClosestPlayer()
             local screenPoint, onScreen = Camera:WorldToViewportPoint(partPosition)
 
             if onScreen or not _G.Aimbot_Onscreen then
-                local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
+                local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - UserInputService:GetMouseLocation()).Magnitude
                 if distance < shortestDistance then
                     if not _G.Aimbot_visiblecheck or IsVisible(partPosition) then
                         closestPlayer = player
@@ -73,7 +72,7 @@ UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
         _G.Aiming = true
     elseif input.UserInputType == Enum.UserInputType.MouseButton1 and _G.ToggleFriendMode then
-        local target = Mouse.Target
+        local target = UserInputService:GetMouseLocation()
         if target and target.Parent and Players:FindFirstChild(target.Parent.Name) then
             local player = Players:FindFirstChild(target.Parent.Name)
             if Friends[player.Name] then
@@ -114,7 +113,7 @@ end)
 RunService.RenderStepped:Connect(function()
     -- Центрирование круга FOV относительно мыши
     local mouseLocation = UserInputService:GetMouseLocation()
-    FOVCircle.Position = Vector2.new(mouseLocation.X, mouseLocation.Y + 36)
+    FOVCircle.Position = mouseLocation
     UpdateFOVCircle()
 
     if _G.Aiming and _G.Aimbot then
