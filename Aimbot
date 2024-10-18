@@ -34,6 +34,12 @@ local function UpdateFOVCircle()
     FOVCircle.Visible = _G.Aimbot and _G.Aimbot_Draw_FOV
 end
 
+local function IsVisible(targetPosition)
+    local ray = Ray.new(Camera.CFrame.Position, (targetPosition - Camera.CFrame.Position).unit * 500)
+    local hit, _ = workspace:FindPartOnRay(ray, LocalPlayer.Character, false, true)
+    return hit and hit:IsDescendantOf(LocalPlayer.Character)
+end
+
 local function GetClosestPlayer()
     local closestPlayer = nil
     local shortestDistance = _G.Aimbot_FOV_Radius
@@ -50,14 +56,7 @@ local function GetClosestPlayer()
             if onScreen or not _G.Aimbot_Onscreen then
                 local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
                 if distance < shortestDistance then
-                    if _G.Aimbot_visiblecheck then
-                        local ray = Ray.new(Camera.CFrame.Position, (partPosition - Camera.CFrame.Position).unit * 500)
-                        local hit, _ = workspace:FindPartOnRay(ray, LocalPlayer.Character, false, true)
-                        if hit and hit:IsDescendantOf(player.Character) then
-                            closestPlayer = player
-                            shortestDistance = distance
-                        end
-                    else
+                    if not _G.Aimbot_visiblecheck or IsVisible(partPosition) then
                         closestPlayer = player
                         shortestDistance = distance
                     end
@@ -136,9 +135,10 @@ RunService.RenderStepped:Connect(function()
                 local textLabel = Instance.new("TextLabel", billboard)
                 textLabel.Size = UDim2.new(1, 0, 1, 0)
                 textLabel.BackgroundTransparency = 1
-                textLabel.Text = player.Name
-                textLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-                textLabel.TextScaled = true
+                    textLabel.Text = player.Name
+                    textLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+                    textLabel.TextScaled = true
+                end
             end
         end
     end
