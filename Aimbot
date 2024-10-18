@@ -32,7 +32,7 @@ FOVCircle.Transparency = 1
 local function UpdateFOVCircle()
     FOVCircle.Radius = _G.Aimbot_FOV_Radius
     FOVCircle.Color = _G.Aimbot_FOV_Color
-    FOVCircle.Visible = _G.Aimbot_Draw_FOV
+    FOVCircle.Visible = _G.Aimbot and _G.Aimbot_Draw_FOV
 end
 
 local function GetClosestPlayer()
@@ -114,7 +114,7 @@ end)
 
 RunService.RenderStepped:Connect(function()
     -- Обновление позиции круга FOV
-    FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y) -- Центрирование круга по мыши
+    FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y)
     UpdateFOVCircle()
 
     if _G.Aiming and _G.Aimbot then
