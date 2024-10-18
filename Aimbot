@@ -22,6 +22,7 @@ _G.Aimbot_Draw_FOV = _G.Aimbot_Draw_FOV or true
 _G.Aimbot_visiblecheck = _G.Aimbot_visiblecheck or false
 _G.Aimbot_Onscreen = _G.Aimbot_Onscreen or true
 _G.Aiming = _G.Aiming or false
+_G.Aimbot_Smoothness = _G.Aimbot_Smoothness or 0.1 -- Новая настройка плавности
 
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Thickness = 2
@@ -120,7 +121,7 @@ RunService.RenderStepped:Connect(function()
         local closestPlayer = GetClosestPlayer()
         if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild(_G.Aimbot_AimPart) then
             local targetPosition = closestPlayer.Character[_G.Aimbot_AimPart].Position
-            local tweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+            local tweenInfo = TweenInfo.new(_G.Aimbot_Smoothness, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
             local tween = TweenService:Create(Camera, tweenInfo, {CFrame = CFrame.new(Camera.CFrame.Position, targetPosition)})
             tween:Play()
         end
