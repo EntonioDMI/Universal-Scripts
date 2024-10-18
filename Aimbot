@@ -22,7 +22,7 @@ _G.Aimbot_Draw_FOV = _G.Aimbot_Draw_FOV or true
 _G.Aimbot_visiblecheck = _G.Aimbot_visiblecheck or false
 _G.Aimbot_Onscreen = _G.Aimbot_Onscreen or true
 _G.Aiming = _G.Aiming or false
-_G.Aimbot_Smoothness = 0.1 -- Новая настройка плавности
+_G.Aimbot_Smoothness = _G.Aimbot_Smoothness or 0.1 -- Новая настройка плавности
 
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Thickness = 2
@@ -125,9 +125,12 @@ RunService.RenderStepped:Connect(function()
             -- Проверка значения плавности
             local smoothness = math.clamp(_G.Aimbot_Smoothness, 0.01, 0.99) -- Устанавливаем границы от 0.01 до 0.99
 
-            local tweenInfo = TweenInfo.new(smoothness, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-            local tween = TweenService:Create(Camera, tweenInfo, {CFrame = CFrame.new(Camera.CFrame.Position, targetPosition)})
-            tween:Play()
+            local currentCFrame = Camera.CFrame
+            local targetCFrame = CFrame.new(currentCFrame.Position, targetPosition)
+            
+            -- Интерполяция между текущей и целевой CFrame
+            local newCFrame = currentCFrame:Lerp(targetCFrame, smoothness)
+            Camera.CFrame = newCFrame
         end
     end
 
