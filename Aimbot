@@ -40,7 +40,7 @@ local function GetClosestPlayer()
 
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(_G.Aimbot_AimPart) then
-            if _G.Aimbot_TeamCheck and player.Team == LocalPlayer.Team then
+            if (_G.Aimbot_TeamCheck and player.Team == LocalPlayer.Team) or Friends[player.Name] then
                 continue
             end
 
@@ -113,7 +113,7 @@ end)
 
 RunService.RenderStepped:Connect(function()
     -- Центрирование круга FOV относительно центра мыши
-    FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y + 36)
+    FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y)
     UpdateFOVCircle()
 
     if _G.Aiming and _G.Aimbot then
