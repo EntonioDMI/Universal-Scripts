@@ -102,5 +102,12 @@ RunService.RenderStepped:Connect(function()
         for _, v in ipairs(Players:GetPlayers()) do
             manageHighlight(v)
         end
+    else
+        -- Обновляем цвет команды в реальном времени
+        for _, v in ipairs(Players:GetPlayers()) do
+            if highlightCache[v.Name] then
+                updateHighlight(highlightCache[v.Name], v)
+            end
+        end
     end
 end)
