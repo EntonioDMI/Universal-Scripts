@@ -1,7 +1,6 @@
--- AimbotAndFriendSystem.lua
-
--- Подключаем библиотеку меню
-local Menu = require(game:GetService("ReplicatedStorage"):WaitForChild("MenuLibrary"))
+--[[
+    Aimbot and Friend System
+--]]
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -12,7 +11,18 @@ local Mouse = LocalPlayer:GetMouse()
 
 local Friends = {}
 
--- Настройка круга FOV
+-- Глобальные переменные для настроек
+_G.Aimbot = _G.Aimbot or false
+_G.Aimbot_FOV_Radius = _G.Aimbot_FOV_Radius or 200
+_G.Aimbot_FOV_Color = _G.Aimbot_FOV_Color or Color3.fromRGB(255, 255, 255)
+_G.ToggleFriendMode = _G.ToggleFriendMode or false
+_G.Aimbot_AimPart = _G.Aimbot_AimPart or "Head"
+_G.Aimbot_TeamCheck = _G.Aimbot_TeamCheck or false
+_G.Aimbot_Draw_FOV = _G.Aimbot_Draw_FOV or true
+_G.Aimbot_visiblecheck = _G.Aimbot_visiblecheck or false
+_G.Aimbot_Onscreen = _G.Aimbot_Onscreen or true
+_G.Aiming = _G.Aiming or false
+
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Thickness = 1
 FOVCircle.Filled = false
@@ -59,34 +69,6 @@ local function GetClosestPlayer()
     return closestPlayer
 end
 
-local function ToggleFriend(player)
-    if Friends[player.Name] then
-        Friends[player.Name] = nil
-        if player.Character and player.Character:FindFirstChild("Head") then
-            local head = player.Character.Head
-            if head:FindFirstChild("BillboardGui") then
-                head.BillboardGui:Destroy()
-            end
-        end
-    else
-        Friends[player.Name] = true
-        if player.Character and player.Character:FindFirstChild("Head") then
-            local head = player.Character.Head
-            local billboard = Instance.new("BillboardGui", head)
-            billboard.Size = UDim2.new(0, 100, 0, 100)
-            billboard.StudsOffset = Vector3.new(0, 2, 0)
-            billboard.AlwaysOnTop = true
-
-            local textLabel = Instance.new("TextLabel", billboard)
-            textLabel.Size = UDim2.new(1, 0, 1, 0)
-            textLabel.BackgroundTransparency = 1
-            textLabel.Text = player.Name
-            textLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-            textLabel.TextScaled = true
-        end
-    end
-end
-
 UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
         _G.Aiming = true
@@ -94,7 +76,31 @@ UserInputService.InputBegan:Connect(function(input)
         local target = Mouse.Target
         if target and target.Parent and Players:FindFirstChild(target.Parent.Name) then
             local player = Players:FindFirstChild(target.Parent.Name)
-            ToggleFriend(player)
+            if Friends[player.Name] then
+                Friends[player.Name] = nil
+                if player.Character and player.Character:FindFirstChild("Head") then
+                    local head = player.Character.Head
+                    if head:FindFirstChild("BillboardGui") then
+                        head.BillboardGui:Destroy()
+                    end
+                end
+            else
+                Friends[player.Name] = true
+                if player.Character and player.Character:FindFirstChild("Head") then
+                    local head = player.Character.Head
+                    local billboard = Instance.new("BillboardGui", head)
+                    billboard.Size = UDim2.new(0, 100, 0, 100)
+                    billboard.StudsOffset = Vector3.new(0, 2, 0)
+                    billboard.AlwaysOnTop = true
+
+                    local textLabel = Instance.new("TextLabel", billboard)
+                    textLabel.Size = UDim2.new(1, 0, 1, 0)
+                    textLabel.BackgroundTransparency = 1
+                    textLabel.Text = player.Name
+                    textLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+                    textLabel.TextScaled = true
+                end
+            end
         end
     end
 end)
