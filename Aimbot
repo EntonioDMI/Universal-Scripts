@@ -111,9 +111,9 @@ UserInputService.InputEnded:Connect(function(input)
 end)
 
 RunService.RenderStepped:Connect(function()
-    -- Центрирование круга FOV относительно курсора
+    -- Центрирование круга FOV относительно мыши
     local mouseLocation = UserInputService:GetMouseLocation()
-    FOVCircle.Position = Vector2.new(mouseLocation.X, mouseLocation.Y + 36) -- Смещение для центрирования
+    FOVCircle.Position = Vector2.new(mouseLocation.X, mouseLocation.Y + 36)
     UpdateFOVCircle()
 
     if _G.Aiming and _G.Aimbot then
