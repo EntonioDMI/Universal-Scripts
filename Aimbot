@@ -112,7 +112,7 @@ end)
 
 RunService.RenderStepped:Connect(function()
     -- Центрирование круга FOV относительно центра мыши
-    FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y + 40) -- Опустим круг ниже
+    FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y + 60) -- Опустим круг ниже
     UpdateFOVCircle()
 
     if _G.Aiming and _G.Aimbot then
