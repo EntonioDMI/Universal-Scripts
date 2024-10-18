@@ -1,6 +1,10 @@
 -- Получаем игрока
 local player = game.Players.LocalPlayer
 
+_G.MyScriptPlayerSpeedEnabled = false
+_G.MyScriptPlayerSpeed = 16
+_G.MyScriptPlayerJumpHeight = 50
+
 -- Функция для симуляции увеличения скорости и высоты прыжка
 local function simulatePlayerModifications(character)
     -- Ждем, пока Humanoid не станет доступным
