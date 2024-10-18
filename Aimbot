@@ -1,112 +1,132 @@
--- Aimbot.lua
+--[[
+    Aimbot and Friend System
+    ___  _  _ ___ _  _ ____ ___  _ 
+   / _ \| || | _ \ || |__ / _ \| |
+   | (_) | __ |  _/ __ | || (_) | |
+   \___/|_||_|_| |_||_|_| \___/|_|
+                                  
+--]]
 
--- Global Configuration
-_G.AimbotTeamCheck = false   -- Set to true to only target players on different teams
-_G.AimbotFOV = 150           -- Field of View
-_G.AimbotSmoothing = 0.1     -- Smoothing factor (0 = instant, 1 = no movement)
-_G.AimbotFOVColor = Color3.fromRGB(255, 128, 128) -- FOV circle color
-_G.AimbotFOVThickness = 1.5  -- FOV circle thickness
-_G.AimbotEnabled = false     -- Aimbot enabled state
-_G.IgnorePlayers = {}        -- List of players to ignore
-_G.AddingFriends = false     -- State for adding friends
-
--- Services
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
+-- Локальные переменные
 local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Mouse = LocalPlayer:GetMouse()
 
--- GUI
-local FOVring = Drawing.new("Circle")
-FOVring.Visible = false
-FOVring.Thickness = _G.AimbotFOVThickness
-FOVring.Radius = _G.AimbotFOV
-FOVring.Transparency = 1
-FOVring.Color = _G.AimbotFOVColor
+-- Таблица друзей
+local Friends = {}
 
-local function getClosestVisiblePlayer(camera)
-    local mouseLocation = UserInputService:GetMouseLocation()
+-- Создание круга FOV
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Radius = _G.Aimbot_FOV_Radius
+FOVCircle.Thickness = 1
+FOVCircle.Filled = false
+FOVCircle.Transparency = 1
+FOVCircle.Color = _G.Aimbot_FOV_Color
+FOVCircle.Visible = _G.Aimbot_Draw_FOV
+
+-- Функция получения ближайшего игрока
+local function GetClosestPlayer()
     local closestPlayer = nil
-    local closestDistance = math.huge
-    
+    local shortestDistance = _G.Aimbot_FOV_Radius
+
     for _, player in pairs(Players:GetPlayers()) do
-        if player ~= Players.LocalPlayer and not _G.IgnorePlayers[player.Name] then
-            local character = player.Character
-            if character and character:FindFirstChild("Head") then
-                local headPosition = character.Head.Position
-                local headScreenPosition = camera:WorldToScreenPoint(headPosition)
-                local distanceToMouse = (Vector2.new(headScreenPosition.X, headScreenPosition.Y) - mouseLocation).Magnitude
-                
-                if distanceToMouse < closestDistance and distanceToMouse < _G.AimbotFOV then
-                    closestDistance = distanceToMouse
-                    closestPlayer = player
-                end
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(_G.Aimbot_AimPart) then
+            if _G.Aimbot_TeamCheck and player.Team == LocalPlayer.Team then
+                continue
             end
-        end
-    end
-    
-    return closestPlayer
-end
 
-local aimbotActive = false
-local function updateAimbot()
-    local mouseLocation = UserInputService:GetMouseLocation()
-    FOVring.Position = Vector2.new(mouseLocation.X, mouseLocation.Y)
-    
-    if _G.AimbotEnabled and aimbotActive then
-        FOVring.Visible = true
-        
-        local currentCamera = workspace.CurrentCamera
-        local closestPlayer = getClosestVisiblePlayer(currentCamera)
-        
-        if closestPlayer then
-            local headPosition = closestPlayer.Character.Head.Position
-            local direction = (headPosition - currentCamera.CFrame.Position).Unit
-            local targetCFrame = CFrame.new(currentCamera.CFrame.Position, currentCamera.CFrame.Position + direction)
-            
-            currentCamera.CFrame = currentCamera.CFrame:Lerp(targetCFrame, _G.AimbotSmoothing)
-        end
-    else
-        FOVring.Visible = _G.AimbotEnabled
-    end
-end
+            local partPosition = player.Character[_G.Aimbot_AimPart].Position
+            local screenPoint, onScreen = Camera:WorldToViewportPoint(partPosition)
 
-UserInputService.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then
-        aimbotActive = true
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then
-        aimbotActive = false
-    end
-end)
-
-UserInputService.InputBegan:Connect(function(input)
-    if _G.AddingFriends and input.UserInputType == Enum.UserInputType.MouseButton1 then
-        local mouseLocation = UserInputService:GetMouseLocation()
-        local currentCamera = workspace.CurrentCamera
-        
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= Players.LocalPlayer then
-                local character = player.Character
-                if character and character:FindFirstChild("Head") then
-                    local headPosition = character.Head.Position
-                    local headScreenPosition = currentCamera:WorldToScreenPoint(headPosition)
-                    local distanceToMouse = (Vector2.new(headScreenPosition.X, headScreenPosition.Y) - mouseLocation).Magnitude
-                    
-                    if distanceToMouse < 50 then -- Click threshold
-                        if _G.IgnorePlayers[player.Name] then
-                            _G.IgnorePlayers[player.Name] = nil
-                        else
-                            _G.IgnorePlayers[player.Name] = true
+            if onScreen or not _G.Aimbot_Onscreen then
+                local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
+                if distance < shortestDistance then
+                    if _G.Aimbot_visiblecheck then
+                        local ray = Ray.new(Camera.CFrame.Position, (partPosition - Camera.CFrame.Position).unit * 500)
+                        local hit, _ = workspace:FindPartOnRay(ray, LocalPlayer.Character, false, true)
+                        if hit and hit:IsDescendantOf(player.Character) then
+                            closestPlayer = player
+                            shortestDistance = distance
                         end
-                        break
+                    else
+                        closestPlayer = player
+                        shortestDistance = distance
                     end
                 end
             end
         end
     end
+
+    return closestPlayer
+end
+
+-- Обработчик нажатия кнопки мыши
+UserInputService.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        _G.Aiming = true
+    elseif input.UserInputType == Enum.UserInputType.MouseButton1 and _G.ToggleFriendMode then
+        local target = Mouse.Target
+        if target and target.Parent and Players:FindFirstChild(target.Parent.Name) then
+            local player = Players:FindFirstChild(target.Parent.Name)
+            if Friends[player.Name] then
+                -- Удаление из друзей
+                Friends[player.Name] = nil
+                player.Character.Head.BillboardGui.TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            else
+                -- Добавление в друзья
+                Friends[player.Name] = true
+                player.Character.Head.BillboardGui.TextLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+            end
+        end
+    end
 end)
 
-RunService.RenderStepped:Connect(updateAimbot)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        _G.Aiming = false
+    end
+end)
+
+-- Основной цикл аимбота
+RunService.RenderStepped:Connect(function()
+    -- Обновление позиции круга FOV
+    FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y)
+    FOVCircle.Radius = _G.Aimbot_FOV_Radius
+    FOVCircle.Color = _G.Aimbot_FOV_Color
+    FOVCircle.Visible = _G.Aimbot_Draw_FOV
+
+    if _G.Aiming and _G.Aimbot then
+        local closestPlayer = GetClosestPlayer()
+        if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild(_G.Aimbot_AimPart) then
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, closestPlayer.Character[_G.Aimbot_AimPart].Position)
+        end
+    end
+
+    -- Обновление видимости имён друзей
+    for playerName, _ in pairs(Friends) do
+        local player = Players:FindFirstChild(playerName)
+        if player and player.Character then
+            local head = player.Character:FindFirstChild("Head")
+            if head then
+                if not head:FindFirstChild("BillboardGui") then
+                    local billboard = Instance.new("BillboardGui", head)
+                    billboard.Size = UDim2.new(0, 100, 0, 100)
+                    billboard.StudsOffset = Vector3.new(0, 2, 0)
+                    billboard.AlwaysOnTop = true
+
+                    local textLabel = Instance.new("TextLabel", billboard)
+                    textLabel.Size = UDim2.new(1, 0, 1, 0)
+                    textLabel.BackgroundTransparency = 1
+                    textLabel.Text = player.Name
+                    textLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+                    textLabel.TextScaled = true
+                else
+                    head.BillboardGui.Enabled = true
+                end
+            end
+        end
+    end
+end)
