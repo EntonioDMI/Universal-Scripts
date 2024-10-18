@@ -1,5 +1,7 @@
 -- Основной скрипт для управления хитбоксами
 
+_G.Disabled = true
+
 -- Функция для сброса хитбоксов тиммейтов
 local function resetTeamHitboxes()
     local localPlayer = game:GetService('Players').LocalPlayer
