@@ -12,12 +12,15 @@ local Mouse = LocalPlayer:GetMouse()
 
 local Friends = {}
 
-local FOVCircle = Drawing.new("Circle")
-FOVCircle.Radius = _G.Aimbot_FOV_Radius
-FOVCircle.Thickness = 1
-FOVCircle.Filled = false
-FOVCircle.Transparency = 1
-FOVCircle.Color = _G.Aimbot_FOV_Color
+-- Создание GUI круга FOV
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+local FOVCircle = Instance.new("Frame", ScreenGui)
+FOVCircle.AnchorPoint = Vector2.new(0.5, 0.5)
+FOVCircle.Position = UDim2.new(0, Mouse.X, 0, Mouse.Y)
+FOVCircle.Size = UDim2.new(0, _G.Aimbot_FOV_Radius * 2, 0, _G.Aimbot_FOV_Radius * 2)
+FOVCircle.BackgroundColor3 = _G.Aimbot_FOV_Color
+FOVCircle.BackgroundTransparency = 0.5
+FOVCircle.BorderSizePixel = 0
 FOVCircle.Visible = _G.Aimbot_Draw_FOV
 
 local function GetClosestPlayer()
@@ -99,9 +102,9 @@ end)
 
 RunService.RenderStepped:Connect(function()
     -- Обновление позиции круга FOV
-    FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y + 36) -- Смещение круга ниже курсора
-    FOVCircle.Radius = _G.Aimbot_FOV_Radius
-    FOVCircle.Color = _G.Aimbot_FOV_Color
+    FOVCircle.Position = UDim2.new(0, Mouse.X, 0, Mouse.Y + 36) -- Смещение круга ниже курсора
+    FOVCircle.Size = UDim2.new(0, _G.Aimbot_FOV_Radius * 2, 0, _G.Aimbot_FOV_Radius * 2)
+    FOVCircle.BackgroundColor3 = _G.Aimbot_FOV_Color
     FOVCircle.Visible = _G.Aimbot_Draw_FOV
 
     if _G.Aiming and _G.Aimbot then
