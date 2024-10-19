@@ -17,7 +17,6 @@ _G.Aiming = _G.Aiming or false
 _G.Aimbot_Smoothness = _G.Aimbot_Smoothness or 1
 _G.FriendList = _G.FriendList or {}
 
--- Создание круга FOV
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Thickness = 2
 FOVCircle.Filled = false
@@ -37,7 +36,7 @@ local function IsVisible(targetPosition)
     local raycastParams = RaycastParams.new()
     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
     raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
-
+    
     local result = workspace:Raycast(origin, direction, raycastParams)
     return result == nil or result.Instance:IsDescendantOf(LocalPlayer.Character)
 end
@@ -55,13 +54,11 @@ local function GetClosestPlayer()
                 local partPosition = player.Character[_G.Aimbot_AimPart].Position
                 local screenPoint, onScreen = Camera:WorldToViewportPoint(partPosition)
 
-                if onScreen or not _G.Aimbot_Onscreen then
+                if (onScreen or not _G.Aimbot_Onscreen) and (not _G.Aimbot_visiblecheck or IsVisible(partPosition)) then
                     local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - UserInputService:GetMouseLocation()).Magnitude
                     if distance < shortestDistance then
-                        if not _G.Aimbot_visiblecheck or IsVisible(partPosition) then
-                            closestPlayer = player
-                            shortestDistance = distance
-                        end
+                        closestPlayer = player
+                        shortestDistance = distance
                     end
                 end
             end
@@ -70,6 +67,8 @@ local function GetClosestPlayer()
 
     return closestPlayer
 end
+
+local currentTarget = nil
 
 UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
@@ -80,6 +79,7 @@ end)
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
         _G.Aiming = false
+        currentTarget = nil
     end
 end)
 
@@ -88,9 +88,12 @@ RunService.RenderStepped:Connect(function()
     UpdateFOVCircle()
 
     if _G.Aiming and _G.Aimbot then
-        local closestPlayer = GetClosestPlayer()
-        if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild(_G.Aimbot_AimPart) then
-            local targetPosition = closestPlayer.Character[_G.Aimbot_AimPart].Position
+        if not currentTarget or not currentTarget.Character or not currentTarget.Character:FindFirstChild(_G.Aimbot_AimPart) then
+            currentTarget = GetClosestPlayer()
+        end
+
+        if currentTarget and currentTarget.Character and currentTarget.Character:FindFirstChild(_G.Aimbot_AimPart) then
+            local targetPosition = currentTarget.Character[_G.Aimbot_AimPart].Position
             local direction = (targetPosition - Camera.CFrame.Position).unit
             local currentLookVector = Camera.CFrame.LookVector
             local newLookVector = currentLookVector:Lerp(direction, _G.Aimbot_Smoothness)
