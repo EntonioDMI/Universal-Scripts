@@ -35,10 +35,13 @@ local function IsVisible(targetPosition, character)
     local direction = (targetPosition - origin).unit * 500
     local raycastParams = RaycastParams.new()
     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, character}
+    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
 
     local result = workspace:Raycast(origin, direction, raycastParams)
-    return result == nil or result.Instance:IsDescendantOf(character)
+    if result then
+        return result.Instance:IsDescendantOf(character)
+    end
+    return false
 end
 
 local function GetClosestPlayer()
