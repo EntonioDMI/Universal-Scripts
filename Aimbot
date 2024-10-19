@@ -41,9 +41,8 @@ local function IsVisible(targetPosition, character)
     if result then
         local hitInstance = result.Instance
         local isPartOfCharacter = hitInstance:IsDescendantOf(character)
-        local hasNoCollision = not hitInstance.CanCollide
 
-        return isPartOfCharacter or hasNoCollision
+        return isPartOfCharacter
     else
         return true
     end
