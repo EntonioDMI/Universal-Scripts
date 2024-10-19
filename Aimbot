@@ -14,7 +14,7 @@ _G.Aimbot_Draw_FOV = _G.Aimbot_Draw_FOV or true
 _G.Aimbot_visiblecheck = _G.Aimbot_visiblecheck or false
 _G.Aimbot_Onscreen = _G.Aimbot_Onscreen or true
 _G.Aiming = _G.Aiming or false
-_G.Aimbot_Smoothness = _G.Aimbot_Smoothness or 0.1
+_G.Aimbot_Smoothness = _G.Aimbot_Smoothness or 1
 _G.FriendList = _G.FriendList or {}
 
 -- Создание круга FOV
