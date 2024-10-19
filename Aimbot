@@ -78,7 +78,7 @@ local function UpdateAimbot()
     
     if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild(_G.Aimbot_AimPart) then
         local targetPosition = closestPlayer.Character[_G.Aimbot_AimPart].Position
-        Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPosition)
+        Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, targetPosition), _G.Aimbot_Smoothness)
     end
 end
 
