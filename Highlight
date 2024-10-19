@@ -82,8 +82,6 @@ end
 
 Players.PlayerAdded:Connect(function(plr)
     manageHighlight(plr)
-    plr.CharacterAdded:Wait()
-    manageHighlight(plr)
 end)
 
 Players.PlayerRemoving:Connect(function(plr)
