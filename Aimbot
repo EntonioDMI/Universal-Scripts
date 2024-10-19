@@ -1,7 +1,3 @@
---[[
-    Aimbot and Friend System
---]]
-
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
@@ -9,20 +5,17 @@ local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
-local Friends = {}
-
 -- Глобальные переменные для настроек
 _G.Aimbot = _G.Aimbot or false
 _G.Aimbot_FOV_Radius = _G.Aimbot_FOV_Radius or 200
 _G.Aimbot_FOV_Color = _G.Aimbot_FOV_Color or Color3.fromRGB(255, 255, 255)
-_G.ToggleFriendMode = _G.ToggleFriendMode or false
 _G.Aimbot_AimPart = _G.Aimbot_AimPart or "Head"
 _G.Aimbot_TeamCheck = _G.Aimbot_TeamCheck or false
 _G.Aimbot_Draw_FOV = _G.Aimbot_Draw_FOV or true
 _G.Aimbot_visiblecheck = _G.Aimbot_visiblecheck or false
 _G.Aimbot_Onscreen = _G.Aimbot_Onscreen or true
 _G.Aiming = _G.Aiming or false
-_G.Aimbot_Smoothness = 0
+_G.Aimbot_Smoothness = _G.Aimbot_Smoothness or 0.1
 
 -- Создание круга FOV
 local FOVCircle = Drawing.new("Circle")
@@ -36,13 +29,17 @@ local function UpdateFOVCircle()
     FOVCircle.Visible = _G.Aimbot and _G.Aimbot_Draw_FOV
 end
 
--- Обновляем круг FOV сразу после установки начальных значений
 UpdateFOVCircle()
 
 local function IsVisible(targetPosition)
-    local ray = Ray.new(Camera.CFrame.Position, (targetPosition - Camera.CFrame.Position).unit * 500)
-    local hit, _ = workspace:FindPartOnRay(ray, LocalPlayer.Character, false, true)
-    return hit and hit:IsDescendantOf(LocalPlayer.Character)
+    local origin = Camera.CFrame.Position
+    local direction = (targetPosition - origin).unit * 500
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
+
+    local result = workspace:Raycast(origin, direction, raycastParams)
+    return result == nil or result.Instance:IsDescendantOf(LocalPlayer.Character)
 end
 
 local function GetClosestPlayer()
@@ -51,7 +48,7 @@ local function GetClosestPlayer()
 
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(_G.Aimbot_AimPart) then
-            if (_G.Aimbot_TeamCheck and player.Team == LocalPlayer.Team) or Friends[player.Name] then
+            if _G.Aimbot_TeamCheck and player.Team == LocalPlayer.Team then
                 continue
             end
 
@@ -76,36 +73,6 @@ end
 UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
         _G.Aiming = true
-    elseif input.UserInputType == Enum.UserInputType.MouseButton1 and _G.ToggleFriendMode then
-        local target = UserInputService:GetMouseLocation()
-        if target and target.Parent and Players:FindFirstChild(target.Parent.Name) then
-            local player = Players:FindFirstChild(target.Parent.Name)
-            if Friends[player.Name] then
-                Friends[player.Name] = nil
-                if player.Character and player.Character:FindFirstChild("Head") then
-                    local head = player.Character.Head
-                    if head:FindFirstChild("BillboardGui") then
-                        head.BillboardGui:Destroy()
-                    end
-                end
-            else
-                Friends[player.Name] = true
-                if player.Character and player.Character:FindFirstChild("Head") then
-                    local head = player.Character.Head
-                    local billboard = Instance.new("BillboardGui", head)
-                    billboard.Size = UDim2.new(0, 100, 0, 100)
-                    billboard.StudsOffset = Vector3.new(0, 2, 0)
-                    billboard.AlwaysOnTop = true
-
-                    local textLabel = Instance.new("TextLabel", billboard)
-                    textLabel.Size = UDim2.new(1, 0, 1, 0)
-                    textLabel.BackgroundTransparency = 1
-                    textLabel.Text = player.Name
-                    textLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-                    textLabel.TextScaled = true
-                end
-            end
-        end
     end
 end)
 
@@ -116,43 +83,17 @@ UserInputService.InputEnded:Connect(function(input)
 end)
 
 RunService.RenderStepped:Connect(function()
-    -- Центрирование круга FOV относительно мыши
-    local mouseLocation = UserInputService:GetMouseLocation()
-    FOVCircle.Position = mouseLocation
+    FOVCircle.Position = UserInputService:GetMouseLocation()
     UpdateFOVCircle()
 
     if _G.Aiming and _G.Aimbot then
         local closestPlayer = GetClosestPlayer()
         if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild(_G.Aimbot_AimPart) then
             local targetPosition = closestPlayer.Character[_G.Aimbot_AimPart].Position
-            
-            -- Проверка значения плавности
             local smoothness = math.clamp(_G.Aimbot_Smoothness, 0.01, 1)
-
-            -- Создание твина для плавного наведения
             local tweenInfo = TweenInfo.new(smoothness, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
             local tween = TweenService:Create(Camera, tweenInfo, {CFrame = CFrame.new(Camera.CFrame.Position, targetPosition)})
             tween:Play()
-        end
-    end
-
-    for playerName, _ in pairs(Friends) do
-        local player = Players:FindFirstChild(playerName)
-        if player and player.Character then
-            local head = player.Character:FindFirstChild("Head")
-            if head and not head:FindFirstChild("BillboardGui") then
-                local billboard = Instance.new("BillboardGui", head)
-                billboard.Size = UDim2.new(0, 100, 0, 100)
-                billboard.StudsOffset = Vector3.new(0, 2, 0)
-                billboard.AlwaysOnTop = true
-
-                local textLabel = Instance.new("TextLabel", billboard)
-                textLabel.Size = UDim2.new(1, 0, 1, 0)
-                textLabel.BackgroundTransparency = 1
-                textLabel.Text = player.Name
-                textLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-                textLabel.TextScaled = true
-            end
         end
     end
 end)
