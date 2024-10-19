@@ -15,6 +15,7 @@ _G.Aimbot_visiblecheck = _G.Aimbot_visiblecheck or false
 _G.Aimbot_Onscreen = _G.Aimbot_Onscreen or true
 _G.Aiming = _G.Aiming or false
 _G.Aimbot_Smoothness = _G.Aimbot_Smoothness or 0.1
+_G.FriendList = _G.FriendList or {}
 
 -- Создание круга FOV
 local FOVCircle = Drawing.new("Circle")
@@ -47,19 +48,20 @@ local function GetClosestPlayer()
 
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(_G.Aimbot_AimPart) then
-            if _G.Aimbot_TeamCheck and player.Team == LocalPlayer.Team then
-                continue
-            end
+            local isSameTeam = _G.Aimbot_TeamCheck and player.Team == LocalPlayer.Team
+            local isFriend = table.find(_G.FriendList, player.Name) ~= nil
 
-            local partPosition = player.Character[_G.Aimbot_AimPart].Position
-            local screenPoint, onScreen = Camera:WorldToViewportPoint(partPosition)
+            if not isSameTeam and not isFriend then
+                local partPosition = player.Character[_G.Aimbot_AimPart].Position
+                local screenPoint, onScreen = Camera:WorldToViewportPoint(partPosition)
 
-            if onScreen or not _G.Aimbot_Onscreen then
-                local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - UserInputService:GetMouseLocation()).Magnitude
-                if distance < shortestDistance then
-                    if not _G.Aimbot_visiblecheck or IsVisible(partPosition) then
-                        closestPlayer = player
-                        shortestDistance = distance
+                if onScreen or not _G.Aimbot_Onscreen then
+                    local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - UserInputService:GetMouseLocation()).Magnitude
+                    if distance < shortestDistance then
+                        if not _G.Aimbot_visiblecheck or IsVisible(partPosition) then
+                            closestPlayer = player
+                            shortestDistance = distance
+                        end
                     end
                 end
             end
