@@ -4,7 +4,6 @@ local Camera = workspace.CurrentCamera
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
--- Глобальные переменные для настроек
 _G.Aimbot = _G.Aimbot or false
 _G.Aimbot_FOV_Radius = _G.Aimbot_FOV_Radius or 200
 _G.Aimbot_FOV_Color = _G.Aimbot_FOV_Color or Color3.fromRGB(255, 255, 255)
@@ -13,7 +12,7 @@ _G.Aimbot_TeamCheck = _G.Aimbot_TeamCheck or false
 _G.Aimbot_Draw_FOV = _G.Aimbot_Draw_FOV or true
 _G.Aimbot_Onscreen = _G.Aimbot_Onscreen or true
 _G.Aiming = _G.Aiming or false
-_G.Aimbot_Smoothness = _G.Aimbot_Smoothness or 0.1
+_G.Aimbot_Smoothness = _G.Aimbot_Smoothness or 1
 _G.FriendList = _G.FriendList or {}
 _G.Aimbot_WallCheck = _G.Aimbot_WallCheck or true
 
@@ -41,7 +40,7 @@ local function checkWall(targetCharacter)
     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
 
     local raycastResult = workspace:Raycast(origin, direction, raycastParams)
-    return raycastResult and raycastResult.Instance ~= targetPart
+    return raycastResult and raycastResult.Instance ~= nil
 end
 
 local function GetClosestPlayer()
@@ -75,12 +74,14 @@ local currentTarget = nil
 
 UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        print("Aiming started")
         _G.Aiming = true
     end
 end)
 
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        print("Aiming stopped")
         _G.Aiming = false
         currentTarget = nil
     end
