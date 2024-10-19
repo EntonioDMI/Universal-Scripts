@@ -14,7 +14,7 @@ _G.Aimbot_Onscreen = _G.Aimbot_Onscreen or true
 _G.Aiming = _G.Aiming or false
 _G.Aimbot_Smoothness = _G.Aimbot_Smoothness or 1
 _G.FriendList = _G.FriendList or {}
-_G.Aimbot_WallCheck = _G.Aimbot_WallCheck or true
+_G.Aimbot_WallCheck = _G.Aimbot_WallCheck or false
 
 local fovCircle = Drawing.new("Circle")
 fovCircle.Thickness = 2
@@ -26,15 +26,18 @@ fovCircle.Visible = false
 local currentTarget = nil
 
 local function checkTeam(player)
-    return _G.Aimbot_TeamCheck and player.Team == LocalPlayer.Team
+    if _G.Aimbot_TeamCheck and player.Team == LocalPlayer.Team then
+        return true
+    end
+    return false
 end
 
 local function checkWall(targetCharacter)
-    local targetHead = targetCharacter:FindFirstChild(_G.Aimbot_AimPart)
-    if not targetHead then return false end
+    local targetPart = targetCharacter:FindFirstChild(_G.Aimbot_AimPart)
+    if not targetPart then return false end
 
     local origin = Camera.CFrame.Position
-    local direction = (targetHead.Position - origin).unit * (targetHead.Position - origin).magnitude
+    local direction = (targetPart.Position - origin).unit * (targetPart.Position - origin).magnitude
     local raycastParams = RaycastParams.new()
     raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, targetCharacter}
     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
@@ -67,11 +70,22 @@ local function getTarget()
     return nearestPlayer
 end
 
+local function predict(player)
+    if player and player.Character and player.Character:FindFirstChild(_G.Aimbot_AimPart) and player.Character:FindFirstChild("HumanoidRootPart") then
+        local targetPart = player.Character[_G.Aimbot_AimPart]
+        local velocity = player.Character.HumanoidRootPart.Velocity
+        local predictedPosition = targetPart.Position + (velocity * 0.065)
+        return predictedPosition
+    end
+    return nil
+end
+
 local function aimAt(player)
-    local targetPart = player.Character[_G.Aimbot_AimPart]
-    local targetPosition = targetPart.Position
-    local targetCFrame = CFrame.new(Camera.CFrame.Position, targetPosition)
-    Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, _G.Aimbot_Smoothness)
+    local predictedPosition = predict(player)
+    if predictedPosition then
+        local targetCFrame = CFrame.new(Camera.CFrame.Position, predictedPosition)
+        Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, _G.Aimbot_Smoothness)
+    end
 end
 
 RunService.RenderStepped:Connect(function()
