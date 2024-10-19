@@ -25,6 +25,7 @@ local function UpdateFOVCircle()
     FOVCircle.Radius = _G.Aimbot_FOV_Radius
     FOVCircle.Color = _G.Aimbot_FOV_Color
     FOVCircle.Visible = _G.Aimbot and _G.Aimbot_Draw_FOV
+    print("FOVCircle updated: Radius = " .. FOVCircle.Radius .. ", Visible = " .. tostring(FOVCircle.Visible))
 end
 
 UpdateFOVCircle()
@@ -67,6 +68,7 @@ local function GetClosestPlayer()
         end
     end
 
+    print("Closest player found: " .. (closestPlayer and closestPlayer.Name or "None"))
     return closestPlayer
 end
 
@@ -103,6 +105,7 @@ RunService.RenderStepped:Connect(function()
             local newLookVector = currentLookVector:Lerp(direction, _G.Aimbot_Smoothness)
 
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, Camera.CFrame.Position + newLookVector)
+            print("Aiming at: " .. currentTarget.Name)
         end
     end
 end)
