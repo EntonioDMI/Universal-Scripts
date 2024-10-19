@@ -41,16 +41,14 @@ local function IsVisible(targetPosition, character)
     if result then
         local hitInstance = result.Instance
         local isPartOfCharacter = hitInstance:IsDescendantOf(character)
-        
-        if isPartOfCharacter then
-            print("Target is visible")
+        local hasCollision = hitInstance.CanCollide
+
+        if isPartOfCharacter or not hasCollision then
             return true
         else
-            print("Target is not visible, hit:", hitInstance:GetFullName())
             return false
         end
     else
-        print("No obstacles, target is visible")
         return true
     end
 end
