@@ -15,6 +15,7 @@ _G.Aimbot_Onscreen = _G.Aimbot_Onscreen or true
 _G.Aiming = _G.Aiming or false
 _G.Aimbot_Smoothness = _G.Aimbot_Smoothness or 1
 _G.FriendList = _G.FriendList or {}
+_G.Aimbot_WallCheck = _G.Aimbot_WallCheck or true
 
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Thickness = 2
@@ -29,6 +30,20 @@ end
 
 UpdateFOVCircle()
 
+local function checkWall(targetCharacter)
+    local targetPart = targetCharacter:FindFirstChild(_G.Aimbot_AimPart)
+    if not targetPart then return true end
+
+    local origin = Camera.CFrame.Position
+    local direction = (targetPart.Position - origin).unit * (targetPart.Position - origin).magnitude
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, targetCharacter}
+    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+    local raycastResult = workspace:Raycast(origin, direction, raycastParams)
+    return raycastResult and raycastResult.Instance ~= nil
+end
+
 local function GetClosestPlayer()
     local closestPlayer = nil
     local shortestDistance = _G.Aimbot_FOV_Radius
@@ -42,7 +57,7 @@ local function GetClosestPlayer()
                 local partPosition = player.Character[_G.Aimbot_AimPart].Position
                 local screenPoint, onScreen = Camera:WorldToViewportPoint(partPosition)
 
-                if (onScreen or not _G.Aimbot_Onscreen) then
+                if (onScreen or not _G.Aimbot_Onscreen) and (not _G.Aimbot_WallCheck or not checkWall(player.Character)) then
                     local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - UserInputService:GetMouseLocation()).Magnitude
                     if distance < shortestDistance then
                         closestPlayer = player
