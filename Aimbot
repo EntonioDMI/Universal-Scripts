@@ -28,6 +28,21 @@ local function UpdateFOVCircle()
     FOVCircle.Visible = _G.Aimbot and _G.Aimbot_Draw_FOV
 end
 
+local function checkWall(targetCharacter)
+    if not targetCharacter then return true end
+    local targetPart = targetCharacter:FindFirstChild(_G.Aimbot_AimPart)
+    if not targetPart then return true end
+
+    local origin = Camera.CFrame.Position
+    local direction = (targetPart.Position - origin).unit * (targetPart.Position - origin).magnitude
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, targetCharacter}
+    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+    local raycastResult = workspace:Raycast(origin, direction, raycastParams)
+    return raycastResult and raycastResult.Instance ~= nil
+end
+
 local function GetClosestPlayer()
     local closestPlayer = nil
     local shortestDistance = _G.Aimbot_FOV_Radius
