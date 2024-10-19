@@ -39,7 +39,16 @@ local function IsVisible(targetPosition, character)
 
     local result = workspace:Raycast(origin, direction, raycastParams)
     if result then
-        return result.Instance:IsDescendantOf(character)
+        local hitInstance = result.Instance
+        local isTransparent = hitInstance.Transparency == 1
+        local hasNoCollision = hitInstance.CanCollide == false
+        local isPartOfCharacter = hitInstance:IsDescendantOf(character)
+
+        if isTransparent or hasNoCollision or isPartOfCharacter then
+            return true
+        else
+            return false
+        end
     else
         return true
     end
