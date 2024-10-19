@@ -3,7 +3,6 @@ local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 
 -- Глобальные переменные для настроек
 _G.Aimbot = _G.Aimbot or false
@@ -90,10 +89,11 @@ RunService.RenderStepped:Connect(function()
         local closestPlayer = GetClosestPlayer()
         if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild(_G.Aimbot_AimPart) then
             local targetPosition = closestPlayer.Character[_G.Aimbot_AimPart].Position
-            local smoothness = math.clamp(_G.Aimbot_Smoothness, 0.01, 1)
-            local tweenInfo = TweenInfo.new(smoothness, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-            local tween = TweenService:Create(Camera, tweenInfo, {CFrame = CFrame.new(Camera.CFrame.Position, targetPosition)})
-            tween:Play()
+            local direction = (targetPosition - Camera.CFrame.Position).unit
+            local currentLookVector = Camera.CFrame.LookVector
+            local newLookVector = currentLookVector:Lerp(direction, _G.Aimbot_Smoothness)
+
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, Camera.CFrame.Position + newLookVector)
         end
     end
 end)
