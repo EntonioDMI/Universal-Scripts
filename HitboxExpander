@@ -3,17 +3,24 @@
 _G.Disabled = true
 _G.FriendList = _G.FriendList or {}  -- Инициализация списка друзей
 
+-- Функция для сброса хитбоксов
+local function resetHitbox(v)
+    if v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+        local rootPart = v.Character.HumanoidRootPart
+        rootPart.Size = Vector3.new(2, 2, 1) -- Восстанавливаем оригинальный размер
+        rootPart.Transparency = 1
+        rootPart.Material = "Plastic"
+    end
+end
+
 -- Функция для сброса хитбоксов тиммейтов
 local function resetTeamHitboxes()
     local localPlayer = game:GetService('Players').LocalPlayer
     local localTeam = localPlayer.Team
 
     for _, v in ipairs(game:GetService('Players'):GetPlayers()) do
-        if v ~= localPlayer and v.Team == localTeam and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-            local rootPart = v.Character.HumanoidRootPart
-            rootPart.Size = Vector3.new(2, 2, 1) -- Восстанавливаем оригинальный размер
-            rootPart.Transparency = 1
-            rootPart.Material = "Plastic"
+        if v ~= localPlayer and v.Team == localTeam then
+            resetHitbox(v)
         end
     end
 end
@@ -31,8 +38,7 @@ local function updateHitbox(v)
             rootPart.Material = "Neon"
             rootPart.CanCollide = false
         else
-            rootPart.Size = Vector3.new(2, 2, 1) -- Восстанавливаем оригинальный размер
-            rootPart.Transparency = 1
+            resetHitbox(v)
         end
     end
 end
@@ -56,6 +62,8 @@ game:GetService('RunService').RenderStepped:Connect(function()
                 pcall(function()
                     updateHitbox(v)
                 end)
+            elseif isFriend then
+                resetHitbox(v)
             end
         end
     end
@@ -64,26 +72,54 @@ end)
 game:GetService('Players').PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function(character)
         wait(0.1)
-        if not _G.Disabled then
-            local isFriend = table.find(_G.FriendList, player.Name) ~= nil
-            if not isFriend then
-                pcall(function()
-                    updateHitbox(player)
-                end)
-            end
+        local isFriend = table.find(_G.FriendList, player.Name) ~= nil
+        if not _G.Disabled and not isFriend then
+            pcall(function()
+                updateHitbox(player)
+            end)
+        else
+            resetHitbox(player)
         end
 
         -- Подписываемся на событие смерти один раз при создании персонажа
         local humanoid = character:FindFirstChild("Humanoid")
         if humanoid then
             humanoid.Died:Connect(function()
-                local rootPart = character:FindFirstChild("HumanoidRootPart")
-                if rootPart then
-                    rootPart.Size = Vector3.new(2, 2, 1) -- Восстанавливаем оригинальный размер
-                    rootPart.Transparency = 1
-                    rootPart.Material = "Plastic"
-                end
+                resetHitbox(player)
             end)
         end
     end)
+end)
+
+-- Отслеживание изменений в списке друзей
+local lastFriendList = {}
+
+game:GetService('RunService').RenderStepped:Connect(function()
+    local friendListChanged = false
+
+    -- Проверяем, изменился ли список друзей
+    if #lastFriendList ~= #_G.FriendList then
+        friendListChanged = true
+    else
+        for _, friendName in ipairs(_G.FriendList) do
+            if not table.find(lastFriendList, friendName) then
+                friendListChanged = true
+                break
+            end
+        end
+    end
+
+    -- Если список друзей изменился, обновляем хитбоксы
+    if friendListChanged then
+        lastFriendList = {unpack(_G.FriendList)}
+
+        for _, v in ipairs(game:GetService('Players'):GetPlayers()) do
+            local isFriend = table.find(_G.FriendList, v.Name) ~= nil
+            if isFriend then
+                resetHitbox(v)
+            elseif not _G.Disabled then
+                updateHitbox(v)
+            end
+        end
+    end
 end)
