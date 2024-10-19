@@ -16,25 +16,25 @@ _G.Aimbot_Smoothness = _G.Aimbot_Smoothness or 1
 _G.FriendList = _G.FriendList or {}
 _G.Aimbot_WallCheck = _G.Aimbot_WallCheck or true
 
-local FOVCircle = Drawing.new("Circle")
-FOVCircle.Thickness = 1.5
-FOVCircle.Filled = false
-FOVCircle.Transparency = 1
-FOVCircle.Radius = _G.Aimbot_FOV_Radius
-FOVCircle.Color = _G.Aimbot_FOV_Color
+local fovCircle = Drawing.new("Circle")
+fovCircle.Thickness = 2
+fovCircle.Radius = _G.Aimbot_FOV_Radius
+fovCircle.Filled = false
+fovCircle.Color = _G.Aimbot_FOV_Color
+fovCircle.Visible = false
 
-local function UpdateFOVCircle()
-    FOVCircle.Position = UserInputService:GetMouseLocation()
-    FOVCircle.Visible = _G.Aimbot and _G.Aimbot_Draw_FOV
+local currentTarget = nil
+
+local function checkTeam(player)
+    return _G.Aimbot_TeamCheck and player.Team == LocalPlayer.Team
 end
 
 local function checkWall(targetCharacter)
-    if not targetCharacter then return false end
-    local targetPart = targetCharacter:FindFirstChild(_G.Aimbot_AimPart)
-    if not targetPart then return false end
+    local targetHead = targetCharacter:FindFirstChild(_G.Aimbot_AimPart)
+    if not targetHead then return false end
 
     local origin = Camera.CFrame.Position
-    local direction = (targetPart.Position - origin).unit * (targetPart.Position - origin).magnitude
+    local direction = (targetHead.Position - origin).unit * (targetHead.Position - origin).magnitude
     local raycastParams = RaycastParams.new()
     raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, targetCharacter}
     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
@@ -43,44 +43,53 @@ local function checkWall(targetCharacter)
     return not raycastResult
 end
 
-local function GetClosestPlayer()
-    local closestPlayer = nil
-    local shortestDistance = _G.Aimbot_FOV_Radius
+local function getTarget()
+    local nearestPlayer = nil
+    local shortestCursorDistance = _G.Aimbot_FOV_Radius
 
     for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character then
-            local targetPart = player.Character:FindFirstChild(_G.Aimbot_AimPart)
-            if targetPart then
-                local isSameTeam = _G.Aimbot_TeamCheck and player.Team == LocalPlayer.Team
-                local isFriend = table.find(_G.FriendList, player.Name) ~= nil
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(_G.Aimbot_AimPart) and not checkTeam(player) then
+            local targetPart = player.Character[_G.Aimbot_AimPart]
+            local headPos = Camera:WorldToViewportPoint(targetPart.Position)
+            local screenPos = Vector2.new(headPos.X, headPos.Y)
+            local mousePos = UserInputService:GetMouseLocation()
+            local cursorDistance = (screenPos - mousePos).Magnitude
 
-                if not isSameTeam and not isFriend then
-                    local partPosition = targetPart.Position
-                    local screenPoint, onScreen = Camera:WorldToViewportPoint(partPosition)
-
-                    if (onScreen or not _G.Aimbot_Onscreen) and (not _G.Aimbot_WallCheck or checkWall(player.Character)) then
-                        local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - UserInputService:GetMouseLocation()).Magnitude
-                        if distance < shortestDistance then
-                            closestPlayer = player
-                            shortestDistance = distance
-                        end
-                    end
+            if cursorDistance < shortestCursorDistance and headPos.Z > 0 then
+                if not checkWall(player.Character) or not _G.Aimbot_WallCheck then
+                    shortestCursorDistance = cursorDistance
+                    nearestPlayer = player
                 end
             end
         end
     end
 
-    return closestPlayer
+    return nearestPlayer
 end
 
-local function UpdateAimbot()
-    local closestPlayer = GetClosestPlayer()
-    
-    if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild(_G.Aimbot_AimPart) then
-        local targetPosition = closestPlayer.Character[_G.Aimbot_AimPart].Position
-        Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, targetPosition), _G.Aimbot_Smoothness)
-    end
+local function aimAt(player)
+    local targetPart = player.Character[_G.Aimbot_AimPart]
+    local targetPosition = targetPart.Position
+    local targetCFrame = CFrame.new(Camera.CFrame.Position, targetPosition)
+    Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, _G.Aimbot_Smoothness)
 end
+
+RunService.RenderStepped:Connect(function()
+    fovCircle.Position = UserInputService:GetMouseLocation()
+    fovCircle.Visible = _G.Aimbot and _G.Aimbot_Draw_FOV
+
+    if _G.Aiming and _G.Aimbot then
+        if not currentTarget then
+            currentTarget = getTarget()
+        end
+
+        if currentTarget then
+            aimAt(currentTarget)
+        end
+    else
+        currentTarget = nil
+    end
+end)
 
 UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
@@ -91,13 +100,5 @@ end)
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
         _G.Aiming = false
-    end
-end)
-
-RunService.RenderStepped:Connect(function()
-    UpdateFOVCircle()
-    
-    if _G.Aiming and _G.Aimbot then
-        UpdateAimbot()
     end
 end)
