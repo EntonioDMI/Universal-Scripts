@@ -3,27 +3,32 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local lp = Players.LocalPlayer
 
-_G.HighlightEnabled = false
+_G.HighlightEnabled = _G.HighlightEnabled or false
 _G.AutoTeamColor = false
 _G.HighlightTeamCheck = false
 _G.CustomHighlightColor = Color3.fromRGB(255, 255, 255)
 _G.FillTransparency = 0.5
 _G.OutlineTransparency = 0
+_G.FriendList = _G.FriendList or {}
 
 local Storage = Instance.new("Folder")
 Storage.Parent = CoreGui
 Storage.Name = "Highlight_Storage"
 
 local highlightCache = {}
+local pulseTime = 0
 
 local function updateHighlight(highlight, plr)
-    local highlightColor = _G.AutoTeamColor and (plr.Team and plr.Team.TeamColor.Color or Color3.fromRGB(255, 255, 255)) or _G.CustomHighlightColor
-    if highlight.FillColor ~= highlightColor or
-       highlight.FillTransparency ~= _G.FillTransparency or
-       highlight.OutlineTransparency ~= _G.OutlineTransparency then
+    if table.find(_G.FriendList, plr.Name) then
+        highlight.FillColor = Color3.fromRGB(144, 238, 144) -- Салатовый цвет
+        highlight.OutlineColor = Color3.fromRGB(144, 238, 144)
+        highlight.FillTransparency = 0.2 + 0.3 * (0.5 + 0.5 * math.sin(pulseTime))
+    else
+        local highlightColor = _G.AutoTeamColor and (plr.Team and plr.Team.TeamColor.Color or Color3.fromRGB(255, 255, 255)) or _G.CustomHighlightColor
         highlight.FillColor = highlightColor
         highlight.FillTransparency = _G.FillTransparency
         highlight.OutlineTransparency = _G.OutlineTransparency
+        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
     end
 end
 
@@ -79,6 +84,17 @@ Players.PlayerRemoving:Connect(function(plr)
     removeHighlight(plr.Name)
 end)
 
+-- Обновляем состояние пульсации
+RunService.Heartbeat:Connect(function(deltaTime)
+    pulseTime = pulseTime + deltaTime * 2 -- Скорость пульсации
+
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if highlightCache[plr.Name] then
+            updateHighlight(highlightCache[plr.Name], plr)
+        end
+    end
+end)
+
 -- Следим за изменением состояния подсветки и параметров в реальном времени
 local lastHighlightEnabled = _G.HighlightEnabled or false
 local lastTeamCheck = _G.HighlightTeamCheck or false
@@ -111,3 +127,8 @@ RunService.RenderStepped:Connect(function()
         end
     end
 end)
+
+-- Инициализация подсветки для всех игроков
+for _, plr in ipairs(Players:GetPlayers()) do
+    manageHighlight(plr)
+end
