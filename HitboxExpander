@@ -1,6 +1,7 @@
 -- Основной скрипт для управления хитбоксами
 
 _G.Disabled = true
+_G.FriendList = _G.FriendList or {}  -- Инициализация списка друзей
 
 -- Функция для сброса хитбоксов тиммейтов
 local function resetTeamHitboxes()
@@ -50,7 +51,8 @@ game:GetService('RunService').RenderStepped:Connect(function()
     for _, v in ipairs(game:GetService('Players'):GetPlayers()) do
         if v.Name ~= localPlayer.Name then
             local isSameTeam = _G.TeamCheck and v.Team == localTeam
-            if not _G.Disabled and not isSameTeam then
+            local isFriend = table.find(_G.FriendList, v.Name) ~= nil
+            if not _G.Disabled and not isSameTeam and not isFriend then
                 pcall(function()
                     updateHitbox(v)
                 end)
@@ -63,9 +65,12 @@ game:GetService('Players').PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function(character)
         wait(0.1)
         if not _G.Disabled then
-            pcall(function()
-                updateHitbox(player)
-            end)
+            local isFriend = table.find(_G.FriendList, player.Name) ~= nil
+            if not isFriend then
+                pcall(function()
+                    updateHitbox(player)
+                end)
+            end
         end
 
         -- Подписываемся на событие смерти один раз при создании персонажа
