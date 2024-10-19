@@ -13,18 +13,6 @@ local function resetHitbox(v)
     end
 end
 
--- Функция для сброса хитбоксов тиммейтов
-local function resetTeamHitboxes()
-    local localPlayer = game:GetService('Players').LocalPlayer
-    local localTeam = localPlayer.Team
-
-    for _, v in ipairs(game:GetService('Players'):GetPlayers()) do
-        if v ~= localPlayer and v.Team == localTeam then
-            resetHitbox(v)
-        end
-    end
-end
-
 -- Основной код для управления хитбоксами
 local function updateHitbox(v)
     if v ~= game:GetService('Players').LocalPlayer and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") then
@@ -43,13 +31,7 @@ local function updateHitbox(v)
     end
 end
 
--- Запуск цикла для сброса хитбоксов
-game:GetService('RunService').Heartbeat:Connect(function(deltaTime)
-    if _G.TeamCheck then
-        resetTeamHitboxes()
-    end
-end)
-
+-- Запуск цикла для обновления хитбоксов
 game:GetService('RunService').RenderStepped:Connect(function()
     local localPlayer = game:GetService('Players').LocalPlayer
     local localTeam = localPlayer.Team
@@ -62,7 +44,7 @@ game:GetService('RunService').RenderStepped:Connect(function()
                 pcall(function()
                     updateHitbox(v)
                 end)
-            elseif isFriend then
+            else
                 resetHitbox(v)
             end
         end
@@ -95,9 +77,9 @@ end)
 local lastFriendList = {}
 
 game:GetService('RunService').RenderStepped:Connect(function()
+    -- Проверяем, изменился ли список друзей
     local friendListChanged = false
 
-    -- Проверяем, изменился ли список друзей
     if #lastFriendList ~= #_G.FriendList then
         friendListChanged = true
     else
