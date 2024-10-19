@@ -16,11 +16,6 @@ _G.Aimbot_Smoothness = _G.Aimbot_Smoothness or 0.1
 _G.FriendList = _G.FriendList or {}
 _G.Aimbot_WallCheck = _G.Aimbot_WallCheck or true
 
-print("Friend List:")
-for _, friend in ipairs(_G.FriendList) do
-    print(friend)
-end
-
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Thickness = 2
 FOVCircle.Filled = false
@@ -69,7 +64,6 @@ local function GetClosestPlayer()
                         if distance < shortestDistance then
                             closestPlayer = player
                             shortestDistance = distance
-                            print("New closest player: " .. player.Name)
                         end
                     end
                 end
@@ -111,9 +105,6 @@ RunService.RenderStepped:Connect(function()
             local newLookVector = currentLookVector:Lerp(direction, _G.Aimbot_Smoothness)
 
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, Camera.CFrame.Position + newLookVector)
-            print("Aiming at: " .. currentTarget.Name)
-        else
-            print("No valid target found")
         end
     end
 end)
