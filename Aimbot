@@ -14,7 +14,13 @@ _G.Aimbot_Onscreen = _G.Aimbot_Onscreen or true
 _G.Aiming = _G.Aiming or false
 _G.Aimbot_Smoothness = _G.Aimbot_Smoothness or 1
 _G.FriendList = _G.FriendList or {}
-_G.Aimbot_WallCheck = _G.Aimbot_WallCheck or true
+_G.Aimbot_WallCheck = _G.Aimbot_WallCheck or false
+
+-- Вывод списка друзей
+print("Friend List:")
+for _, friend in ipairs(_G.FriendList) do
+    print(friend)
+end
 
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Thickness = 2
@@ -25,7 +31,6 @@ local function UpdateFOVCircle()
     FOVCircle.Radius = _G.Aimbot_FOV_Radius
     FOVCircle.Color = _G.Aimbot_FOV_Color
     FOVCircle.Visible = _G.Aimbot and _G.Aimbot_Draw_FOV
-    print("FOVCircle updated: Radius = " .. FOVCircle.Radius .. ", Visible = " .. tostring(FOVCircle.Visible))
 end
 
 UpdateFOVCircle()
@@ -72,7 +77,6 @@ local function GetClosestPlayer()
         end
     end
 
-    print("Closest player found: " .. (closestPlayer and closestPlayer.Name or "None"))
     return closestPlayer
 end
 
@@ -80,14 +84,12 @@ local currentTarget = nil
 
 UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
-        print("Aiming started")
         _G.Aiming = true
     end
 end)
 
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
-        print("Aiming stopped")
         _G.Aiming = false
         currentTarget = nil
     end
@@ -109,9 +111,6 @@ RunService.RenderStepped:Connect(function()
             local newLookVector = currentLookVector:Lerp(direction, _G.Aimbot_Smoothness)
 
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, Camera.CFrame.Position + newLookVector)
-            print("Aiming at: " .. currentTarget.Name)
-        else
-            print("No valid target found")
         end
     end
 end)
