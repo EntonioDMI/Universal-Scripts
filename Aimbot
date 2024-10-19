@@ -40,8 +40,9 @@ local function IsVisible(targetPosition, character)
     local result = workspace:Raycast(origin, direction, raycastParams)
     if result then
         return result.Instance:IsDescendantOf(character)
+    else
+        return true
     end
-    return false
 end
 
 local function GetClosestPlayer()
@@ -57,11 +58,13 @@ local function GetClosestPlayer()
                 local partPosition = player.Character[_G.Aimbot_AimPart].Position
                 local screenPoint, onScreen = Camera:WorldToViewportPoint(partPosition)
 
-                if (onScreen or not _G.Aimbot_Onscreen) and (not _G.Aimbot_visiblecheck or IsVisible(partPosition, player.Character)) then
+                if (onScreen or not _G.Aimbot_Onscreen) then
                     local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - UserInputService:GetMouseLocation()).Magnitude
                     if distance < shortestDistance then
-                        closestPlayer = player
-                        shortestDistance = distance
+                        if not _G.Aimbot_visiblecheck or IsVisible(partPosition, player.Character) then
+                            closestPlayer = player
+                            shortestDistance = distance
+                        end
                     end
                 end
             end
