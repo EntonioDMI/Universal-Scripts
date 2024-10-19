@@ -1,0 +1,113 @@
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local lp = Players.LocalPlayer
+
+_G.HighlightEnabled = false
+_G.AutoTeamColor = false
+_G.HighlightTeamCheck = false
+_G.CustomHighlightColor = Color3.fromRGB(255, 255, 255)
+_G.FillTransparency = 0.5
+_G.OutlineTransparency = 0
+
+local Storage = Instance.new("Folder")
+Storage.Parent = CoreGui
+Storage.Name = "Highlight_Storage"
+
+local highlightCache = {}
+
+local function updateHighlight(highlight, plr)
+    local highlightColor = _G.AutoTeamColor and (plr.Team and plr.Team.TeamColor.Color or Color3.fromRGB(255, 255, 255)) or _G.CustomHighlightColor
+    if highlight.FillColor ~= highlightColor or
+       highlight.FillTransparency ~= _G.FillTransparency or
+       highlight.OutlineTransparency ~= _G.OutlineTransparency then
+        highlight.FillColor = highlightColor
+        highlight.FillTransparency = _G.FillTransparency
+        highlight.OutlineTransparency = _G.OutlineTransparency
+    end
+end
+
+local function getOrCreateHighlight(plr)
+    if highlightCache[plr.Name] then
+        return highlightCache[plr.Name]
+    end
+
+    local highlight = Instance.new("Highlight")
+    highlight.Name = plr.Name
+    highlight.DepthMode = "AlwaysOnTop"
+    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+    highlight.Parent = Storage
+
+    highlightCache[plr.Name] = highlight
+    return highlight
+end
+
+local function removeHighlight(plrName)
+    if highlightCache[plrName] then
+        highlightCache[plrName]:Destroy()
+        highlightCache[plrName] = nil
+    end
+end
+
+local function manageHighlight(plr)
+    local function updatePlayerHighlight()
+        if _G.HighlightEnabled and not (plr == lp or (_G.HighlightTeamCheck and plr.Team == lp.Team)) then
+            local highlight = getOrCreateHighlight(plr)
+            updateHighlight(highlight, plr)
+            highlight.Adornee = plr.Character
+        else
+            removeHighlight(plr.Name)
+        end
+    end
+
+    updatePlayerHighlight()
+
+    plr:GetPropertyChangedSignal("Team"):Connect(updatePlayerHighlight)
+    plr.CharacterAdded:Connect(function(char)
+        updatePlayerHighlight()
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.Died:Connect(function()
+                removeHighlight(plr.Name)
+            end)
+        end
+    end)
+end
+
+Players.PlayerAdded:Connect(manageHighlight)
+Players.PlayerRemoving:Connect(function(plr)
+    removeHighlight(plr.Name)
+end)
+
+-- Следим за изменением состояния подсветки и параметров в реальном времени
+local lastHighlightEnabled = _G.HighlightEnabled or false
+local lastTeamCheck = _G.HighlightTeamCheck or false
+local lastFillTransparency = _G.FillTransparency or 0
+local lastOutlineTransparency = _G.OutlineTransparency or 0
+local lastCustomHighlightColor = _G.CustomHighlightColor or Color3.fromRGB(255, 255, 255)
+
+RunService.RenderStepped:Connect(function()
+    local parametersChanged = lastTeamCheck ~= _G.HighlightTeamCheck or
+                              lastFillTransparency ~= _G.FillTransparency or
+                              lastOutlineTransparency ~= _G.OutlineTransparency or
+                              lastCustomHighlightColor ~= _G.CustomHighlightColor
+
+    if _G.HighlightEnabled ~= lastHighlightEnabled or parametersChanged then
+        lastHighlightEnabled = _G.HighlightEnabled
+        lastTeamCheck = _G.HighlightTeamCheck
+        lastFillTransparency = _G.FillTransparency
+        lastOutlineTransparency = _G.OutlineTransparency
+        lastCustomHighlightColor = _G.CustomHighlightColor
+
+        for _, v in ipairs(Players:GetPlayers()) do
+            manageHighlight(v)
+        end
+    else
+        -- Обновляем цвет команды в реальном времени
+        for _, v in ipairs(Players:GetPlayers()) do
+            if highlightCache[v.Name] then
+                updateHighlight(highlightCache[v.Name], v)
+            end
+        end
+    end
+end)
