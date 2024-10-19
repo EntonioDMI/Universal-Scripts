@@ -3,7 +3,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local lp = Players.LocalPlayer
 
-_G.HighlightEnabled = false
+_G.HighlightEnabled = _G.HighlightEnable or false
 _G.AutoTeamColor = false
 _G.HighlightTeamCheck = false
 _G.CustomHighlightColor = Color3.fromRGB(255, 255, 255)
