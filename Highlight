@@ -3,7 +3,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local lp = Players.LocalPlayer
 
-_G.HighlightEnabled = _G.HighlightEnable or false
+_G.HighlightEnabled = _G.HighlightEnabled or false
 _G.AutoTeamColor = false
 _G.HighlightTeamCheck = false
 _G.CustomHighlightColor = Color3.fromRGB(255, 255, 255)
@@ -91,6 +91,39 @@ RunService.Heartbeat:Connect(function(deltaTime)
     for _, plr in ipairs(Players:GetPlayers()) do
         if highlightCache[plr.Name] then
             updateHighlight(highlightCache[plr.Name], plr)
+        end
+    end
+end)
+
+-- Следим за изменением состояния подсветки и параметров в реальном времени
+local lastHighlightEnabled = _G.HighlightEnabled or false
+local lastTeamCheck = _G.HighlightTeamCheck or false
+local lastFillTransparency = _G.FillTransparency or 0
+local lastOutlineTransparency = _G.OutlineTransparency or 0
+local lastCustomHighlightColor = _G.CustomHighlightColor or Color3.fromRGB(255, 255, 255)
+
+RunService.RenderStepped:Connect(function()
+    local parametersChanged = lastTeamCheck ~= _G.HighlightTeamCheck or
+                              lastFillTransparency ~= _G.FillTransparency or
+                              lastOutlineTransparency ~= _G.OutlineTransparency or
+                              lastCustomHighlightColor ~= _G.CustomHighlightColor
+
+    if _G.HighlightEnabled ~= lastHighlightEnabled or parametersChanged then
+        lastHighlightEnabled = _G.HighlightEnabled
+        lastTeamCheck = _G.HighlightTeamCheck
+        lastFillTransparency = _G.FillTransparency
+        lastOutlineTransparency = _G.OutlineTransparency
+        lastCustomHighlightColor = _G.CustomHighlightColor
+
+        for _, v in ipairs(Players:GetPlayers()) do
+            manageHighlight(v)
+        end
+    else
+        -- Обновляем цвет команды в реальном времени
+        for _, v in ipairs(Players:GetPlayers()) do
+            if highlightCache[v.Name] then
+                updateHighlight(highlightCache[v.Name], v)
+            end
         end
     end
 end)
