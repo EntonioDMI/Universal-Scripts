@@ -25,6 +25,7 @@ local function UpdateFOVCircle()
     FOVCircle.Radius = _G.Aimbot_FOV_Radius
     FOVCircle.Color = _G.Aimbot_FOV_Color
     FOVCircle.Visible = _G.Aimbot and _G.Aimbot_Draw_FOV
+    print("FOVCircle updated: Radius = " .. FOVCircle.Radius .. ", Visible = " .. tostring(FOVCircle.Visible))
 end
 
 UpdateFOVCircle()
@@ -79,12 +80,14 @@ local currentTarget = nil
 
 UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        print("Aiming started")
         _G.Aiming = true
     end
 end)
 
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        print("Aiming stopped")
         _G.Aiming = false
         currentTarget = nil
     end
@@ -106,6 +109,9 @@ RunService.RenderStepped:Connect(function()
             local newLookVector = currentLookVector:Lerp(direction, _G.Aimbot_Smoothness)
 
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, Camera.CFrame.Position + newLookVector)
+            print("Aiming at: " .. currentTarget.Name)
+        else
+            print("No valid target found")
         end
     end
 end)
