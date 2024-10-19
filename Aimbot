@@ -32,18 +32,13 @@ UpdateFOVCircle()
 
 local function IsVisible(targetPosition, character)
     local origin = Camera.CFrame.Position
-    local direction = (targetPosition - origin).Unit * 500
+    local direction = (targetPosition - origin).Unit
     local raycastParams = RaycastParams.new()
     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
     raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, character}
 
-    local result = workspace:Raycast(origin, direction, raycastParams)
-    if result then
-        local hitInstance = result.Instance
-        return hitInstance:IsDescendantOf(character)
-    else
-        return false
-    end
+    local result = workspace:Raycast(origin, direction * 500, raycastParams)
+    return result == nil or result.Instance:IsDescendantOf(character)
 end
 
 local function GetClosestPlayer()
