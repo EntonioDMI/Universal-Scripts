@@ -32,7 +32,7 @@ UpdateFOVCircle()
 
 local function IsVisible(targetPosition, character)
     local origin = Camera.CFrame.Position
-    local direction = (targetPosition - origin).unit * 500
+    local direction = (targetPosition - origin).Unit * 500
     local raycastParams = RaycastParams.new()
     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
     raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
@@ -40,10 +40,10 @@ local function IsVisible(targetPosition, character)
     local result = workspace:Raycast(origin, direction, raycastParams)
     if result then
         local hitInstance = result.Instance
-        local hasNoCollision = not hitInstance.CanCollide
         local isPartOfCharacter = hitInstance:IsDescendantOf(character)
+        local hasNoCollision = not hitInstance.CanCollide
 
-        return hasNoCollision or isPartOfCharacter
+        return isPartOfCharacter or hasNoCollision
     else
         return true
     end
@@ -104,7 +104,7 @@ RunService.RenderStepped:Connect(function()
 
         if currentTarget and currentTarget.Character and currentTarget.Character:FindFirstChild(_G.Aimbot_AimPart) then
             local targetPosition = currentTarget.Character[_G.Aimbot_AimPart].Position
-            local direction = (targetPosition - Camera.CFrame.Position).unit
+            local direction = (targetPosition - Camera.CFrame.Position).Unit
             local currentLookVector = Camera.CFrame.LookVector
             local newLookVector = currentLookVector:Lerp(direction, _G.Aimbot_Smoothness)
 
