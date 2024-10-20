@@ -33,16 +33,16 @@ end
 
 local function checkWall(targetCharacter)
     local targetPart = targetCharacter:FindFirstChild(_G.Aimbot_AimPart)
-    if not targetPart then return false end
+    if not targetPart then return true end
 
     local origin = Camera.CFrame.Position
     local direction = (targetPart.Position - origin).unit * (targetPart.Position - origin).magnitude
     local raycastParams = RaycastParams.new()
-    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
+    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, targetCharacter}
     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
 
     local raycastResult = workspace:Raycast(origin, direction, raycastParams)
-    return raycastResult == nil or raycastResult.Instance:IsDescendantOf(targetCharacter)
+    return raycastResult and raycastResult.Instance ~= nil
 end
 
 local function getTarget()
@@ -58,7 +58,7 @@ local function getTarget()
             local cursorDistance = (screenPos - mousePos).Magnitude
 
             if cursorDistance < shortestCursorDistance and headPos.Z > 0 then
-                if not _G.Aimbot_WallCheck or checkWall(player.Character) then
+                if not _G.Aimbot_WallCheck or not checkWall(player.Character) then
                     shortestCursorDistance = cursorDistance
                     nearestPlayer = player
                 end
