@@ -6,7 +6,7 @@ local RunService = game:GetService("RunService")
 
 _G.Aimbot = _G.Aimbot or false
 _G.Aimbot_FOV_Radius = _G.Aimbot_FOV_Radius or 150
-_G.Aimbot_FOV_Color = _G.Aimbot_FOV_Color or Color3.fromRGB(255, 128, 128)
+_G.Aimbot_FOV_Color = _G.Aimbot_FOV_Color or Color3.fromRGB(255, 255, 255)
 _G.Aimbot_AimPart = _G.Aimbot_AimPart or "Head"
 _G.Aimbot_TeamCheck = _G.Aimbot_TeamCheck or false
 _G.Aimbot_Draw_FOV = _G.Aimbot_Draw_FOV or true
@@ -14,7 +14,7 @@ _G.Aimbot_Onscreen = _G.Aimbot_Onscreen or true
 _G.Aiming = _G.Aiming or false
 _G.Aimbot_Smoothness = _G.Aimbot_Smoothness or 1
 _G.FriendList = _G.FriendList or {}
-_G.Aimbot_WallCheck = _G.Aimbot_WallCheck or false
+_G.Aimbot_WallCheck = _G.Aimbot_WallCheck or true
 
 local fovCircle = Drawing.new("Circle")
 fovCircle.Thickness = 2
@@ -26,10 +26,11 @@ fovCircle.Visible = false
 local currentTarget = nil
 
 local function checkTeam(player)
-    if _G.Aimbot_TeamCheck and player.Team == LocalPlayer.Team then
-        return true
-    end
-    return false
+    return _G.Aimbot_TeamCheck and player.Team == LocalPlayer.Team
+end
+
+local function checkFriend(player)
+    return table.find(_G.FriendList, player.Name) ~= nil
 end
 
 local function checkWall(targetCharacter)
@@ -39,11 +40,11 @@ local function checkWall(targetCharacter)
     local origin = Camera.CFrame.Position
     local direction = (targetPart.Position - origin).unit * (targetPart.Position - origin).magnitude
     local raycastParams = RaycastParams.new()
-    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, targetCharacter}
+    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
 
     local raycastResult = workspace:Raycast(origin, direction, raycastParams)
-    return not raycastResult
+    return not raycastResult or raycastResult.Instance:IsDescendantOf(targetCharacter)
 end
 
 local function getTarget()
@@ -51,7 +52,7 @@ local function getTarget()
     local shortestCursorDistance = _G.Aimbot_FOV_Radius
 
     for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(_G.Aimbot_AimPart) and not checkTeam(player) then
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(_G.Aimbot_AimPart) and not checkTeam(player) and not checkFriend(player) then
             local targetPart = player.Character[_G.Aimbot_AimPart]
             local headPos = Camera:WorldToViewportPoint(targetPart.Position)
             local screenPos = Vector2.new(headPos.X, headPos.Y)
@@ -59,7 +60,7 @@ local function getTarget()
             local cursorDistance = (screenPos - mousePos).Magnitude
 
             if cursorDistance < shortestCursorDistance and headPos.Z > 0 then
-                if not checkWall(player.Character) or not _G.Aimbot_WallCheck then
+                if not _G.Aimbot_WallCheck or checkWall(player.Character) then
                     shortestCursorDistance = cursorDistance
                     nearestPlayer = player
                 end
@@ -90,6 +91,7 @@ end
 
 RunService.RenderStepped:Connect(function()
     fovCircle.Position = UserInputService:GetMouseLocation()
+    fovCircle.Radius = _G.Aimbot_FOV_Radius
     fovCircle.Visible = _G.Aimbot and _G.Aimbot_Draw_FOV
 
     if _G.Aiming and _G.Aimbot then
