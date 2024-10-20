@@ -4,7 +4,7 @@ local Camera = workspace.CurrentCamera
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
-_G.Aimbot = _G.Aimbot or false
+_G.Aimbot = _G.Aimbot or true
 _G.Aimbot_FOV_Radius = _G.Aimbot_FOV_Radius or 150
 _G.Aimbot_FOV_Color = _G.Aimbot_FOV_Color or Color3.fromRGB(255, 255, 255)
 _G.Aimbot_AimPart = _G.Aimbot_AimPart or "Head"
@@ -14,7 +14,7 @@ _G.Aimbot_Onscreen = _G.Aimbot_Onscreen or true
 _G.Aiming = _G.Aiming or false
 _G.Aimbot_Smoothness = _G.Aimbot_Smoothness or 1
 _G.FriendList = _G.FriendList or {}
-_G.Aimbot_WallCheck = false
+_G.Aimbot_WallCheck = _G.Aimbot_WallCheck or true
 
 local fovCircle = Drawing.new("Circle")
 fovCircle.Thickness = 2
@@ -40,17 +40,16 @@ local function checkWall(targetCharacter)
     local origin = Camera.CFrame.Position
     local direction = (targetPart.Position - origin).unit * (targetPart.Position - origin).magnitude
     local raycastParams = RaycastParams.new()
-    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
+    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, targetCharacter}
     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
 
     local raycastResult = workspace:Raycast(origin, direction, raycastParams)
-    return not raycastResult or raycastResult.Instance:IsDescendantOf(targetCharacter)
+    return raycastResult == nil
 end
 
 local function getTarget()
     local nearestPlayer = nil
     local shortestCursorDistance = _G.Aimbot_FOV_Radius
-    local cameraPos = Camera.CFrame.Position
 
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(_G.Aimbot_AimPart) and not checkTeam(player) and not checkFriend(player) then
@@ -59,14 +58,11 @@ local function getTarget()
             local screenPos = Vector2.new(headPos.X, headPos.Y)
             local mousePos = UserInputService:GetMouseLocation()
             local cursorDistance = (screenPos - mousePos).Magnitude
-            local playerDistance = (targetPart.Position - cameraPos).Magnitude
 
             if cursorDistance < shortestCursorDistance and headPos.Z > 0 then
                 if not _G.Aimbot_WallCheck or checkWall(player.Character) then
-                    if playerDistance < shortestCursorDistance then
-                        shortestCursorDistance = cursorDistance
-                        nearestPlayer = player
-                    end
+                    shortestCursorDistance = cursorDistance
+                    nearestPlayer = player
                 end
             end
         end
