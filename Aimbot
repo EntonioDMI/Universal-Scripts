@@ -23,8 +23,6 @@ fovCircle.Filled = false
 fovCircle.Color = _G.Aimbot_FOV_Color
 fovCircle.Visible = false
 
-local currentTarget = nil
-
 local function checkTeam(player)
     return _G.Aimbot_TeamCheck and player.Team == LocalPlayer.Team
 end
@@ -84,13 +82,11 @@ RunService.RenderStepped:Connect(function()
     fovCircle.Visible = _G.Aimbot and _G.Aimbot_Draw_FOV
 
     if _G.Aiming and _G.Aimbot then
-        currentTarget = getTarget()
+        local currentTarget = getTarget()
 
         if currentTarget then
             aimAt(currentTarget)
         end
-    else
-        currentTarget = nil
     end
 end)
 
