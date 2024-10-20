@@ -1,103 +1,134 @@
+local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
-local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local lp = Players.LocalPlayer
 
-_G.Aimbot = _G.Aimbot or false
-_G.Aimbot_FOV_Radius = _G.Aimbot_FOV_Radius or 150
-_G.Aimbot_FOV_Color = _G.Aimbot_FOV_Color or Color3.fromRGB(255, 255, 255)
-_G.Aimbot_AimPart = _G.Aimbot_AimPart or "Head"
-_G.Aimbot_TeamCheck = _G.Aimbot_TeamCheck or false
-_G.Aimbot_Draw_FOV = _G.Aimbot_Draw_FOV or true
-_G.Aimbot_Onscreen = _G.Aimbot_Onscreen or true
-_G.Aiming = _G.Aiming or false
-_G.Aimbot_Smoothness = _G.Aimbot_Smoothness or 1
+_G.HighlightEnabled = _G.HighlightEnabled or false
+_G.AutoTeamColor = false
+_G.HighlightTeamCheck = false
+_G.CustomHighlightColor = Color3.fromRGB(255, 255, 255)
+_G.FillTransparency = 0.5
+_G.OutlineTransparency = 0
 _G.FriendList = _G.FriendList or {}
-_G.Aimbot_WallCheck = false
 
-local fovCircle = Drawing.new("Circle")
-fovCircle.Thickness = 2
-fovCircle.Radius = _G.Aimbot_FOV_Radius
-fovCircle.Filled = false
-fovCircle.Color = _G.Aimbot_FOV_Color
-fovCircle.Visible = false
+local Storage = Instance.new("Folder")
+Storage.Parent = CoreGui
+Storage.Name = "Highlight_Storage"
 
-local function checkTeam(player)
-    return _G.Aimbot_TeamCheck and player.Team == LocalPlayer.Team
+local highlightCache = {}
+local pulseTime = 0
+
+local function updateHighlight(highlight, plr)
+    if table.find(_G.FriendList, plr.Name) then
+        highlight.FillColor = Color3.fromRGB(144, 238, 144) -- Салатовый цвет
+        highlight.OutlineColor = Color3.fromRGB(144, 238, 144)
+        highlight.FillTransparency = 0.2 + 0.3 * (0.5 + 0.5 * math.sin(pulseTime))
+    else
+        local highlightColor = _G.AutoTeamColor and (plr.Team and plr.Team.TeamColor.Color or Color3.fromRGB(255, 255, 255)) or _G.CustomHighlightColor
+        highlight.FillColor = highlightColor
+        highlight.FillTransparency = _G.FillTransparency
+        highlight.OutlineTransparency = _G.OutlineTransparency
+        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+    end
 end
 
-local function checkFriend(player)
-    return table.find(_G.FriendList, player.Name) ~= nil
+local function getOrCreateHighlight(plr)
+    if highlightCache[plr.Name] then
+        return highlightCache[plr.Name]
+    end
+
+    local highlight = Instance.new("Highlight")
+    highlight.Name = plr.Name
+    highlight.DepthMode = "AlwaysOnTop"
+    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+    highlight.Parent = Storage
+
+    highlightCache[plr.Name] = highlight
+    return highlight
 end
 
-local function checkWall(targetCharacter)
-    local targetPart = targetCharacter:FindFirstChild(_G.Aimbot_AimPart)
-    if not targetPart then return true end
-
-    local origin = Camera.CFrame.Position
-    local direction = (targetPart.Position - origin).unit * (targetPart.Position - origin).magnitude
-    local raycastParams = RaycastParams.new()
-    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, targetCharacter}
-    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-
-    local raycastResult = workspace:Raycast(origin, direction, raycastParams)
-    return raycastResult and raycastResult.Instance ~= nil
+local function removeHighlight(plrName)
+    if highlightCache[plrName] then
+        highlightCache[plrName]:Destroy()
+        highlightCache[plrName] = nil
+    end
 end
 
-local function getTarget()
-    local nearestPlayer = nil
-    local shortestCursorDistance = _G.Aimbot_FOV_Radius
+local function manageHighlight(plr)
+    local function updatePlayerHighlight()
+        if _G.HighlightEnabled and not (plr == lp or (_G.HighlightTeamCheck and plr.Team == lp.Team)) then
+            local highlight = getOrCreateHighlight(plr)
+            updateHighlight(highlight, plr)
+            highlight.Adornee = plr.Character
+        else
+            removeHighlight(plr.Name)
+        end
+    end
 
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(_G.Aimbot_AimPart) and not checkTeam(player) and not checkFriend(player) then
-            local targetPart = player.Character[_G.Aimbot_AimPart]
-            local headPos = Camera:WorldToViewportPoint(targetPart.Position)
-            local screenPos = Vector2.new(headPos.X, headPos.Y)
-            local mousePos = UserInputService:GetMouseLocation()
-            local cursorDistance = (screenPos - mousePos).Magnitude
+    updatePlayerHighlight()
 
-            if cursorDistance < shortestCursorDistance and headPos.Z > 0 then
-                if not _G.Aimbot_WallCheck or not checkWall(player.Character) then
-                    shortestCursorDistance = cursorDistance
-                    nearestPlayer = player
-                end
+    plr:GetPropertyChangedSignal("Team"):Connect(updatePlayerHighlight)
+    plr.CharacterAdded:Connect(function(char)
+        updatePlayerHighlight()
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.Died:Connect(function()
+                removeHighlight(plr.Name)
+            end)
+        end
+    end)
+end
+
+Players.PlayerAdded:Connect(manageHighlight)
+Players.PlayerRemoving:Connect(function(plr)
+    removeHighlight(plr.Name)
+end)
+
+-- Обновляем состояние пульсации
+RunService.Heartbeat:Connect(function(deltaTime)
+    pulseTime = pulseTime + deltaTime * 2 -- Скорость пульсации
+
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if highlightCache[plr.Name] then
+            updateHighlight(highlightCache[plr.Name], plr)
+        end
+    end
+end)
+
+-- Следим за изменением состояния подсветки и параметров в реальном времени
+local lastHighlightEnabled = _G.HighlightEnabled or false
+local lastTeamCheck = _G.HighlightTeamCheck or false
+local lastFillTransparency = _G.FillTransparency or 0
+local lastOutlineTransparency = _G.OutlineTransparency or 0
+local lastCustomHighlightColor = _G.CustomHighlightColor or Color3.fromRGB(255, 255, 255)
+
+RunService.RenderStepped:Connect(function()
+    local parametersChanged = lastTeamCheck ~= _G.HighlightTeamCheck or
+                              lastFillTransparency ~= _G.FillTransparency or
+                              lastOutlineTransparency ~= _G.OutlineTransparency or
+                              lastCustomHighlightColor ~= _G.CustomHighlightColor
+
+    if _G.HighlightEnabled ~= lastHighlightEnabled or parametersChanged then
+        lastHighlightEnabled = _G.HighlightEnabled
+        lastTeamCheck = _G.HighlightTeamCheck
+        lastFillTransparency = _G.FillTransparency
+        lastOutlineTransparency = _G.OutlineTransparency
+        lastCustomHighlightColor = _G.CustomHighlightColor
+
+        for _, v in ipairs(Players:GetPlayers()) do
+            manageHighlight(v)
+        end
+    else
+        -- Обновляем цвет команды в реальном времени
+        for _, v in ipairs(Players:GetPlayers()) do
+            if highlightCache[v.Name] then
+                updateHighlight(highlightCache[v.Name], v)
             end
         end
     end
+end)
 
-    return nearestPlayer
+-- Инициализация подсветки для всех игроков
+for _, plr in ipairs(Players:GetPlayers()) do
+    manageHighlight(plr)
 end
-
-local function aimAt(player)
-    local targetPart = player.Character[_G.Aimbot_AimPart]
-    local targetPosition = targetPart.Position
-    local targetCFrame = CFrame.new(Camera.CFrame.Position, targetPosition)
-    Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, _G.Aimbot_Smoothness)
-end
-
-RunService.RenderStepped:Connect(function()
-    fovCircle.Position = UserInputService:GetMouseLocation()
-    fovCircle.Radius = _G.Aimbot_FOV_Radius
-    fovCircle.Visible = _G.Aimbot and _G.Aimbot_Draw_FOV
-
-    if _G.Aiming and _G.Aimbot then
-        local currentTarget = getTarget()
-
-        if currentTarget then
-            aimAt(currentTarget)
-        end
-    end
-end)
-
-UserInputService.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then
-        _G.Aiming = true
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then
-        _G.Aiming = false
-    end
-end)
