@@ -50,6 +50,7 @@ end
 local function getTarget()
     local nearestPlayer = nil
     local shortestCursorDistance = _G.Aimbot_FOV_Radius
+    local cameraPos = Camera.CFrame.Position
 
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(_G.Aimbot_AimPart) and not checkTeam(player) and not checkFriend(player) then
@@ -58,11 +59,14 @@ local function getTarget()
             local screenPos = Vector2.new(headPos.X, headPos.Y)
             local mousePos = UserInputService:GetMouseLocation()
             local cursorDistance = (screenPos - mousePos).Magnitude
+            local playerDistance = (targetPart.Position - cameraPos).Magnitude
 
             if cursorDistance < shortestCursorDistance and headPos.Z > 0 then
                 if not _G.Aimbot_WallCheck or checkWall(player.Character) then
-                    shortestCursorDistance = cursorDistance
-                    nearestPlayer = player
+                    if playerDistance < shortestCursorDistance then
+                        shortestCursorDistance = cursorDistance
+                        nearestPlayer = player
+                    end
                 end
             end
         end
