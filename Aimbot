@@ -4,7 +4,7 @@ local Camera = workspace.CurrentCamera
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
-_G.Aimbot = _G.Aimbot or true
+_G.Aimbot = _G.Aimbot or false
 _G.Aimbot_FOV_Radius = _G.Aimbot_FOV_Radius or 150
 _G.Aimbot_FOV_Color = _G.Aimbot_FOV_Color or Color3.fromRGB(255, 255, 255)
 _G.Aimbot_AimPart = _G.Aimbot_AimPart or "Head"
@@ -40,11 +40,11 @@ local function checkWall(targetCharacter)
     local origin = Camera.CFrame.Position
     local direction = (targetPart.Position - origin).unit * (targetPart.Position - origin).magnitude
     local raycastParams = RaycastParams.new()
-    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, targetCharacter}
+    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
 
     local raycastResult = workspace:Raycast(origin, direction, raycastParams)
-    return raycastResult == nil
+    return raycastResult == nil or raycastResult.Instance:IsDescendantOf(targetCharacter)
 end
 
 local function getTarget()
