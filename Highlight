@@ -52,6 +52,28 @@ local function removeHighlight(plrName)
     end
 end
 
+local function fadeOutHighlight(plrName)
+    if highlightCache[plrName] then
+        local highlight = highlightCache[plrName]
+        local fadeDuration = 1 -- Длительность исчезновения в секундах
+        local startTime = tick()
+
+        local connection
+        connection = RunService.Heartbeat:Connect(function(deltaTime)
+            local elapsed = tick() - startTime
+            local alpha = math.clamp(elapsed / fadeDuration, 0, 1)
+
+            highlight.FillTransparency = alpha
+            highlight.OutlineTransparency = alpha
+
+            if alpha >= 1 then
+                removeHighlight(plrName)
+                connection:Disconnect()
+            end
+        end)
+    end
+end
+
 local function manageHighlight(plr)
     local function updatePlayerHighlight()
         if _G.HighlightEnabled and not (plr == lp or (_G.HighlightTeamCheck and plr.Team == lp.Team)) then
@@ -71,7 +93,7 @@ local function manageHighlight(plr)
         local humanoid = char:FindFirstChildOfClass("Humanoid")
         if humanoid then
             humanoid.Died:Connect(function()
-                removeHighlight(plr.Name)
+                fadeOutHighlight(plr.Name)
             end)
         end
     end)
