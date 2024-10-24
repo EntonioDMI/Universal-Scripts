@@ -40,16 +40,14 @@ end
 
 -- Функция для обновления конфигурации
 local function updateConfiguration()
-    if player.Character and _G.MyScriptPlayerSpeedEnabled then
-        print("Симуляция увеличения скорости до: " .. _G.MyScriptPlayerSpeed)
-        print("Симуляция увеличения высоты прыжка до: " .. _G.MyScriptPlayerJumpHeight)
+    while true do
+        if player.Character and _G.MyScriptPlayerSpeedEnabled then
+            print("Симуляция увеличения скорости до: " .. _G.MyScriptPlayerSpeed)
+            print("Симуляция увеличения высоты прыжка до: " .. _G.MyScriptPlayerJumpHeight)
+        end
+        wait(1) -- Проверяем каждую секунду
     end
 end
 
 -- Запускаем в отдельном потоке для постоянного обновления
-spawn(function()
-    while true do
-        updateConfiguration()
-        wait(1) -- Проверяем каждую секунду
-    end
-end)
+spawn(updateConfiguration)
