@@ -1,7 +1,7 @@
 -- Получаем игрока
 local player = game.Players.LocalPlayer
 
-_G.MyScriptPlayerSpeedEnabled = false
+_G.MyScriptPlayerSpeedEnabled = _G.MyScriptPlayerSpeedEnabled or false
 _G.MyScriptPlayerSpeed = 16
 _G.MyScriptPlayerJumpHeight = 50
 
