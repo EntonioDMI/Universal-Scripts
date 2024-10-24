@@ -33,18 +33,16 @@ local function updateHighlight(highlight, plr)
 end
 
 local function getOrCreateHighlight(plr)
-    if highlightCache[plr.Name] then
-        return highlightCache[plr.Name]
+    if not highlightCache[plr.Name] then
+        local highlight = Instance.new("Highlight")
+        highlight.Name = plr.Name
+        highlight.DepthMode = "AlwaysOnTop"
+        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+        highlight.Parent = Storage
+
+        highlightCache[plr.Name] = highlight
     end
-
-    local highlight = Instance.new("Highlight")
-    highlight.Name = plr.Name
-    highlight.DepthMode = "AlwaysOnTop"
-    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-    highlight.Parent = Storage
-
-    highlightCache[plr.Name] = highlight
-    return highlight
+    return highlightCache[plr.Name]
 end
 
 local function removeHighlight(plrName)
@@ -123,6 +121,17 @@ RunService.RenderStepped:Connect(function()
         for _, v in ipairs(Players:GetPlayers()) do
             if highlightCache[v.Name] then
                 updateHighlight(highlightCache[v.Name], v)
+            end
+        end
+    end
+end)
+
+-- Периодически проверяем и обновляем настройки
+RunService.Heartbeat:Connect(function()
+    if _G.HighlightEnabled then
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if not highlightCache[plr.Name] then
+                manageHighlight(plr)
             end
         end
     end
