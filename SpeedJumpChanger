@@ -7,14 +7,13 @@ _G.MyScriptPlayerJumpHeight = 50
 
 -- Функция для симуляции увеличения скорости и высоты прыжка
 local function simulatePlayerModifications(character)
-    -- Ждем, пока Humanoid не станет доступным
     local humanoid = character:WaitForChild("Humanoid")
     local rootPart = character:WaitForChild("HumanoidRootPart")
 
     -- Подключаем функцию к RenderStepped для постоянного изменения параметров
     local connection
     connection = game:GetService("RunService").RenderStepped:Connect(function()
-        if _G.MyScriptPlayerChangeModificatorEnabled and humanoid and rootPart then
+        if _G.MyScriptPlayerSpeedEnabled and humanoid and rootPart then
             -- Симулируем увеличение скорости
             local moveDirection = humanoid.MoveDirection * (_G.MyScriptPlayerSpeed - humanoid.WalkSpeed) * game:GetService("RunService").RenderStepped:Wait()
             rootPart.CFrame = rootPart.CFrame + moveDirection
@@ -26,9 +25,19 @@ local function simulatePlayerModifications(character)
         end
     end)
 
-    -- Выводим сообщение в консоль
-    print("Симуляция увеличения скорости до: " .. _G.MyScriptPlayerSpeed)
-    print("Симуляция увеличения высоты прыжка до: " .. _G.MyScriptPlayerJumpHeight)
+    -- Отключаем соединение, когда персонаж умирает
+    humanoid.Died:Connect(function()
+        connection:Disconnect()
+    end)
+
+    -- Следим за изменениями в режиме реального времени
+    while character.Parent do
+        if _G.MyScriptPlayerSpeedEnabled then
+            print("Симуляция увеличения скорости до: " .. _G.MyScriptPlayerSpeed)
+            print("Симуляция увеличения высоты прыжка до: " .. _G.MyScriptPlayerJumpHeight)
+        end
+        wait(1) -- Проверяем каждую секунду
+    end
 end
 
 -- Подключаем функцию к событию CharacterAdded
