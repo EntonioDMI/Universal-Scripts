@@ -30,14 +30,16 @@ local function simulatePlayerModifications(character)
         connection:Disconnect()
     end)
 
-    -- Следим за изменениями в режиме реального времени
-    while character.Parent do
-        if _G.MyScriptPlayerSpeedEnabled then
-            print("Симуляция увеличения скорости до: " .. _G.MyScriptPlayerSpeed)
-            print("Симуляция увеличения высоты прыжка до: " .. _G.MyScriptPlayerJumpHeight)
+    -- Постоянно проверяем изменения конфигурации
+    spawn(function()
+        while true do
+            if _G.MyScriptPlayerSpeedEnabled then
+                print("Симуляция увеличения скорости до: " .. _G.MyScriptPlayerSpeed)
+                print("Симуляция увеличения высоты прыжка до: " .. _G.MyScriptPlayerJumpHeight)
+            end
+            wait(1) -- Проверяем каждую секунду
         end
-        wait(1) -- Проверяем каждую секунду
-    end
+    end)
 end
 
 -- Подключаем функцию к событию CharacterAdded
