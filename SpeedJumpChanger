@@ -1,9 +1,14 @@
 -- Получаем игрока
 local player = game.Players.LocalPlayer
 
+-- Изначальные значения
 _G.MyScriptPlayerSpeedEnabled = false
 _G.MyScriptPlayerSpeed = 16
 _G.MyScriptPlayerJumpHeight = 50
+
+local currentSpeed = _G.MyScriptPlayerSpeed
+local currentJumpHeight = _G.MyScriptPlayerJumpHeight
+local currentSpeedEnabled = _G.MyScriptPlayerSpeedEnabled
 
 local function simulatePlayerModifications(character)
     local humanoid = character:WaitForChild("Humanoid")
@@ -41,11 +46,21 @@ end
 -- Функция для обновления конфигурации
 local function updateConfiguration()
     while true do
-        if player.Character and _G.MyScriptPlayerSpeedEnabled then
-            print("Симуляция увеличения скорости до: " .. _G.MyScriptPlayerSpeed)
-            print("Симуляция увеличения высоты прыжка до: " .. _G.MyScriptPlayerJumpHeight)
+        -- Проверяем изменения в конфигурации
+        if _G.MyScriptPlayerSpeedEnabled ~= currentSpeedEnabled or
+           _G.MyScriptPlayerSpeed ~= currentSpeed or
+           _G.MyScriptPlayerJumpHeight ~= currentJumpHeight then
+           
+            currentSpeedEnabled = _G.MyScriptPlayerSpeedEnabled
+            currentSpeed = _G.MyScriptPlayerSpeed
+            currentJumpHeight = _G.MyScriptPlayerJumpHeight
+            
+            if player.Character and currentSpeedEnabled then
+                print("Симуляция увеличения скорости до: " .. currentSpeed)
+                print("Симуляция увеличения высоты прыжка до: " .. currentJumpHeight)
+            end
         end
-        wait(1) -- Проверяем каждую секунду
+        wait(0.1) -- Проверяем изменения каждые 0.1 секунды
     end
 end
 
