@@ -1,23 +1,20 @@
 -- Получаем игрока
 local player = game.Players.LocalPlayer
 
--- Изначальные значения
-_G.MyScriptPlayerSpeedEnabled = false
+_G.MyScriptPlayerChangeModificatorEnabled = false
 _G.MyScriptPlayerSpeed = 16
 _G.MyScriptPlayerJumpHeight = 50
 
-local currentSpeed = _G.MyScriptPlayerSpeed
-local currentJumpHeight = _G.MyScriptPlayerJumpHeight
-local currentSpeedEnabled = _G.MyScriptPlayerSpeedEnabled
-
+-- Функция для симуляции увеличения скорости и высоты прыжка
 local function simulatePlayerModifications(character)
+    -- Ждем, пока Humanoid не станет доступным
     local humanoid = character:WaitForChild("Humanoid")
     local rootPart = character:WaitForChild("HumanoidRootPart")
 
     -- Подключаем функцию к RenderStepped для постоянного изменения параметров
     local connection
     connection = game:GetService("RunService").RenderStepped:Connect(function()
-        if _G.MyScriptPlayerSpeedEnabled and humanoid and rootPart then
+        if _G.MyScriptPlayerChangeModificatorEnabled and humanoid and rootPart then
             -- Симулируем увеличение скорости
             local moveDirection = humanoid.MoveDirection * (_G.MyScriptPlayerSpeed - humanoid.WalkSpeed) * game:GetService("RunService").RenderStepped:Wait()
             rootPart.CFrame = rootPart.CFrame + moveDirection
@@ -33,6 +30,10 @@ local function simulatePlayerModifications(character)
     humanoid.Died:Connect(function()
         connection:Disconnect()
     end)
+
+    -- Выводим сообщение в консоль
+    print("Симуляция увеличения скорости до: " .. _G.MyScriptPlayerSpeed)
+    print("Симуляция увеличения высоты прыжка до: " .. _G.MyScriptPlayerJumpHeight)
 end
 
 -- Подключаем функцию к событию CharacterAdded
@@ -42,27 +43,3 @@ player.CharacterAdded:Connect(simulatePlayerModifications)
 if player.Character then
     simulatePlayerModifications(player.Character)
 end
-
--- Функция для обновления конфигурации
-local function updateConfiguration()
-    while true do
-        -- Проверяем изменения в конфигурации
-        if _G.MyScriptPlayerSpeedEnabled ~= currentSpeedEnabled or
-           _G.MyScriptPlayerSpeed ~= currentSpeed or
-           _G.MyScriptPlayerJumpHeight ~= currentJumpHeight then
-           
-            currentSpeedEnabled = _G.MyScriptPlayerSpeedEnabled
-            currentSpeed = _G.MyScriptPlayerSpeed
-            currentJumpHeight = _G.MyScriptPlayerJumpHeight
-            
-            if player.Character and currentSpeedEnabled then
-                print("Симуляция увеличения скорости до: " .. currentSpeed)
-                print("Симуляция увеличения высоты прыжка до: " .. currentJumpHeight)
-            end
-        end
-        wait(0.1) -- Проверяем изменения каждые 0.1 секунды
-    end
-end
-
--- Запускаем в отдельном потоке для постоянного обновления
-spawn(updateConfiguration)
