@@ -1,6 +1,7 @@
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local lp = Players.LocalPlayer
 
 _G.HighlightEnabled = _G.HighlightEnabled or false
@@ -55,21 +56,12 @@ end
 local function fadeOutHighlight(plrName)
     if highlightCache[plrName] then
         local highlight = highlightCache[plrName]
-        local fadeDuration = 1 -- Длительность исчезновения в секундах
-        local startTime = tick()
+        local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out) -- Длительность исчезновения в секундах
+        local tween = TweenService:Create(highlight, tweenInfo, {FillTransparency = 1, OutlineTransparency = 1})
 
-        local connection
-        connection = RunService.Heartbeat:Connect(function(deltaTime)
-            local elapsed = tick() - startTime
-            local alpha = math.clamp(elapsed / fadeDuration, 0, 1)
-
-            highlight.FillTransparency = alpha
-            highlight.OutlineTransparency = alpha
-
-            if alpha >= 1 then
-                removeHighlight(plrName)
-                connection:Disconnect()
-            end
+        tween:Play()
+        tween.Completed:Connect(function()
+            removeHighlight(plrName)
         end)
     end
 end
