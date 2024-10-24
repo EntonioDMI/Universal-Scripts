@@ -10,7 +10,8 @@ local function simulatePlayerModifications(character)
     local rootPart = character:WaitForChild("HumanoidRootPart")
 
     -- Подключаем функцию к RenderStepped для постоянного изменения параметров
-    game:GetService("RunService").RenderStepped:Connect(function()
+    local connection
+    connection = game:GetService("RunService").RenderStepped:Connect(function()
         if _G.MyScriptPlayerSpeedEnabled and humanoid and rootPart then
             -- Симулируем увеличение скорости
             local moveDirection = humanoid.MoveDirection * (_G.MyScriptPlayerSpeed - humanoid.WalkSpeed) * game:GetService("RunService").RenderStepped:Wait()
