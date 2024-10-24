@@ -18,15 +18,15 @@ Storage.Name = "Highlight_Storage"
 local highlightCache = {}
 local pulseTime = 0
 
-local function updateHighlight(highlight, plr, isFading)
+local function updateHighlight(highlight, plr)
     if table.find(_G.FriendList, plr.Name) then
-        highlight.FillColor = Color3.fromRGB(0, 255, 0) -- Яркий зеленый цвет
-        highlight.OutlineColor = Color3.fromRGB(0, 255, 0)
-        highlight.FillTransparency = isFading and highlight.FillTransparency or (0.1 + 0.3 * (0.5 + 0.5 * math.sin(pulseTime)))
+        highlight.FillColor = Color3.fromRGB(144, 238, 144) -- Салатовый цвет
+        highlight.OutlineColor = Color3.fromRGB(144, 238, 144)
+        highlight.FillTransparency = 0.2 + 0.3 * (0.5 + 0.5 * math.sin(pulseTime))
     else
         local highlightColor = _G.AutoTeamColor and (plr.Team and plr.Team.TeamColor.Color or Color3.fromRGB(255, 255, 255)) or _G.CustomHighlightColor
         highlight.FillColor = highlightColor
-        highlight.FillTransparency = isFading and highlight.FillTransparency or _G.FillTransparency
+        highlight.FillTransparency = _G.FillTransparency
         highlight.OutlineTransparency = _G.OutlineTransparency
         highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
     end
@@ -34,18 +34,13 @@ end
 
 local function getOrCreateHighlight(plr)
     if not highlightCache[plr.Name] then
-        local existingHighlight = Storage:FindFirstChild(plr.Name)
-        if existingHighlight then
-            highlightCache[plr.Name] = existingHighlight
-        else
-            local highlight = Instance.new("Highlight")
-            highlight.Name = plr.Name
-            highlight.DepthMode = "AlwaysOnTop"
-            highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-            highlight.Parent = Storage
+        local highlight = Instance.new("Highlight")
+        highlight.Name = plr.Name
+        highlight.DepthMode = "AlwaysOnTop"
+        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+        highlight.Parent = Storage
 
-            highlightCache[plr.Name] = highlight
-        end
+        highlightCache[plr.Name] = highlight
     end
     return highlightCache[plr.Name]
 end
@@ -61,7 +56,7 @@ local function manageHighlight(plr)
     local function updatePlayerHighlight()
         if _G.HighlightEnabled and not (plr == lp or (_G.HighlightTeamCheck and plr.Team == lp.Team)) then
             local highlight = getOrCreateHighlight(plr)
-            updateHighlight(highlight, plr, false)
+            updateHighlight(highlight, plr)
             highlight.Adornee = plr.Character
         else
             removeHighlight(plr.Name)
@@ -76,12 +71,7 @@ local function manageHighlight(plr)
         local humanoid = char:FindFirstChildOfClass("Humanoid")
         if humanoid then
             humanoid.Died:Connect(function()
-                local highlight = getOrCreateHighlight(plr)
-                for i = 0, 30 do
-                    RunService.Heartbeat:Wait()
-                    highlight.FillTransparency = _G.FillTransparency + (i / 30) * (1 - _G.FillTransparency)
-                    updateHighlight(highlight, plr, true)
-                end
+                removeHighlight(plr.Name)
             end)
         end
     end)
@@ -98,7 +88,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
 
     for _, plr in ipairs(Players:GetPlayers()) do
         if highlightCache[plr.Name] then
-            updateHighlight(highlightCache[plr.Name], plr, false)
+            updateHighlight(highlightCache[plr.Name], plr)
         end
     end
 end)
@@ -127,9 +117,10 @@ RunService.RenderStepped:Connect(function()
             manageHighlight(v)
         end
     else
+        -- Обновляем цвет команды в реальном времени
         for _, v in ipairs(Players:GetPlayers()) do
             if highlightCache[v.Name] then
-                updateHighlight(highlightCache[v.Name], v, false)
+                updateHighlight(highlightCache[v.Name], v)
             end
         end
     end
